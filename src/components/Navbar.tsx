@@ -298,20 +298,18 @@ export const Navbar: React.FC = () => {
                     </div>
 
                     <div className="p-1 space-y-0.5">
-                      {/* Committee Profile (For Evaluator & Admin) */}
-                      {isEvaluatorOrAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsUserDropdownOpen(false);
-                            setIsProfileModalOpen(true);
-                          }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition cursor-pointer"
-                        >
-                          <Camera className="w-4 h-4 text-blue-600" />
-                          <span>โปรไฟล์และรูปภาพกรรมการ</span>
-                        </button>
-                      )}
+                      {/* User Profile & Photo for All Roles */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserDropdownOpen(false);
+                          setIsProfileModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-blue-600" />
+                        <span>แก้ไขโปรไฟล์และรูปภาพ</span>
+                      </button>
 
                       {/* System Settings for Admin */}
                       {currentUser.role === 'admin' && (
@@ -582,13 +580,7 @@ export const Navbar: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => {
-            if (isEvaluatorOrAdmin) {
-              setIsProfileModalOpen(true);
-            } else {
-              setIsPersonaModalOpen(true);
-            }
-          }}
+          onClick={() => setIsProfileModalOpen(true)}
           className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-blue-600 transition cursor-pointer"
         >
           <UserCircle className="w-5 h-5" />

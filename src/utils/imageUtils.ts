@@ -6,9 +6,9 @@
 
 export async function compressAndResizeImage(
   input: File | string,
-  maxWidth: number = 480,
-  maxHeight: number = 480,
-  quality: number = 0.85
+  maxWidth: number = 400,
+  maxHeight: number = 400,
+  quality: number = 0.82
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const processImg = (src: string) => {
@@ -39,6 +39,10 @@ export async function compressAndResizeImage(
           resolve(src);
           return;
         }
+
+        // Fill background with white for transparent PNGs
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
 
         // Draw smooth image
         ctx.imageSmoothingEnabled = true;
@@ -74,3 +78,4 @@ export async function compressAndResizeImage(
     }
   });
 }
+

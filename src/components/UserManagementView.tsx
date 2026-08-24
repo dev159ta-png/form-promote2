@@ -356,21 +356,23 @@ export const UserManagementView: React.FC = () => {
     });
   };
 
-  // Image Upload helper (converts to base64 Data URL)
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image Upload helper (converts to optimized compressed base64 Data URL)
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('ขนาดไฟล์รูปภาพต้องไม่เกิน 2MB');
-        return;
+      try {
+        const compressed = await compressAndResizeImage(file, 400, 400, 0.82);
+        setFormData((prev) => ({ ...prev, avatar: compressed }));
+      } catch (err) {
+        console.error('Image compression failed:', err);
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            setFormData((prev) => ({ ...prev, avatar: reader.result as string }));
+          }
+        };
+        reader.readAsDataURL(file);
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setFormData((prev) => ({ ...prev, avatar: reader.result as string }));
-        }
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -390,6 +392,7 @@ export const UserManagementView: React.FC = () => {
       phone: formData.phone,
       employeeCode: formData.employeeCode,
       avatar: formData.avatar || undefined,
+      avatarUrl: formData.avatar || undefined,
       leaveStats: formData.role === 'staff' ? formData.leaveStats : undefined,
       formTemplateId: formData.role === 'staff' ? formData.formTemplateId : undefined,
     });
@@ -415,6 +418,7 @@ export const UserManagementView: React.FC = () => {
       phone: formData.phone,
       employeeCode: formData.employeeCode,
       avatar: formData.avatar || undefined,
+      avatarUrl: formData.avatar || undefined,
       leaveStats: formData.role === 'staff' ? formData.leaveStats : undefined,
       formTemplateId: formData.role === 'staff' ? formData.formTemplateId : undefined,
     });

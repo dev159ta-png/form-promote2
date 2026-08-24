@@ -86,6 +86,7 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
       ) {
         hasChanged = true;
       }
+      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['evaluator_1'];
       u = {
         ...u,
         id: 'evaluator_1',
@@ -98,8 +99,8 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
         employeeCode: 'EV-101',
         email: u.email || 'orawan.p@chainat-special.ac.th',
         phone: u.phone || '081-987-6543',
-        avatarUrl: OFFICIAL_AVATARS['evaluator_1'],
-        avatar: OFFICIAL_AVATARS['evaluator_1'],
+        avatarUrl: existingAvatar,
+        avatar: existingAvatar,
       };
     }
 
@@ -119,6 +120,7 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
       ) {
         hasChanged = true;
       }
+      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['user_admin_1'];
       u = {
         ...u,
         id: 'user_admin_1',
@@ -130,18 +132,16 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
         employeeCode: 'EV-302',
         email: u.email || 'rannaphat.m@chainat-special.ac.th',
         phone: u.phone || '087-321-0987',
-        avatarUrl: OFFICIAL_AVATARS['user_admin_1'],
-        avatar: OFFICIAL_AVATARS['user_admin_1'],
+        avatarUrl: existingAvatar,
+        avatar: existingAvatar,
       };
     }
 
-    // 3. Set official photo if user is in official avatar map
-    if (OFFICIAL_AVATARS[u.id]) {
-      if (u.avatarUrl !== OFFICIAL_AVATARS[u.id] || u.avatar !== OFFICIAL_AVATARS[u.id]) {
-        u.avatarUrl = OFFICIAL_AVATARS[u.id];
-        u.avatar = OFFICIAL_AVATARS[u.id];
-        hasChanged = true;
-      }
+    // 3. Set default official photo only if user has no avatar set
+    if (OFFICIAL_AVATARS[u.id] && !u.avatarUrl && !u.avatar) {
+      u.avatarUrl = OFFICIAL_AVATARS[u.id];
+      u.avatar = OFFICIAL_AVATARS[u.id];
+      hasChanged = true;
     }
 
     // 4. Normalize avatar and avatarUrl for all users
@@ -451,10 +451,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }
 
-          // Check if any committee or admin needs official avatar update on Firestore
+          // Check if any committee or admin needs official avatar default on Firestore if empty
           for (const remoteUser of remoteUsers) {
-            if (OFFICIAL_AVATARS[remoteUser.id] && remoteUser.avatarUrl !== OFFICIAL_AVATARS[remoteUser.id]) {
-              console.log(`Updating official avatar for ${remoteUser.name} on Firestore...`);
+            if (OFFICIAL_AVATARS[remoteUser.id] && !remoteUser.avatarUrl && !remoteUser.avatar) {
+              console.log(`Setting default official avatar for ${remoteUser.name} on Firestore...`);
               await FirebaseService.saveUser({
                 ...remoteUser,
                 avatarUrl: OFFICIAL_AVATARS[remoteUser.id],
