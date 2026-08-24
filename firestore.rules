@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // System Settings - Read and write
+    match /systemSettings/{settingId} {
+      allow read, write: if true;
+    }
+
+    // Grade Thresholds
+    match /gradeThresholds/{docId} {
+      allow read, write: if true;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // Committee Groups
+    match /committeeGroups/{groupId} {
+      allow read, write: if true;
+    }
+
+    // Target Position Groups (กลุ่มสายงานเป้าหมาย)
+    match /targetPositionGroups/{groupId} {
+      allow read, write: if true;
+    }
+
+    // Form Templates
+    match /formTemplates/{templateId} {
+      allow read, write: if true;
+    }
+
+    // Evaluation Submissions
+    match /submissions/{submissionId} {
+      allow read, write: if true;
+    }
+
+    // Audit Logs
+    match /auditLogs/{logId} {
+      allow read, write: if true;
+    }
+  }
+}

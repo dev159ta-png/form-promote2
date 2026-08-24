@@ -1,0 +1,143 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile, role, and credentials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string" },
+        "position": { "type": "string" },
+        "department": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "employeeCode": { "type": "string" }
+      }
+    },
+    "CommitteeGroup": {
+      "title": "CommitteeGroup",
+      "description": "Evaluation committee group and assigned evaluatees",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "evaluatorIds": { "type": "array" },
+        "assignedEvaluateeIds": { "type": "array" }
+      }
+    },
+    "TargetPositionGroup": {
+      "title": "TargetPositionGroup",
+      "description": "Target job position category group configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "description": { "type": "string" },
+        "color": { "type": "string" },
+        "order": { "type": "number" },
+        "isDefault": { "type": "boolean" }
+      }
+    },
+    "FormTemplate": {
+      "title": "FormTemplate",
+      "description": "Evaluation rubric template for position",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "positionTitle": { "type": "string" },
+        "categories": { "type": "array" }
+      }
+    },
+    "EvaluationSubmission": {
+      "title": "EvaluationSubmission",
+      "description": "Evaluation score submission and comments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "evaluateeId": { "type": "string" },
+        "evaluatorId": { "type": "string" },
+        "formId": { "type": "string" },
+        "totalScore": { "type": "number" },
+        "percentage": { "type": "number" },
+        "grade": { "type": "string" }
+      }
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Global system configurations",
+      "type": "object",
+      "properties": {
+        "appName": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "schoolAffiliation": { "type": "string" },
+        "academicYear": { "type": "string" },
+        "evaluationRound": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "isDemoMode": { "type": "boolean" }
+      }
+    },
+    "GradeThreshold": {
+      "title": "GradeThreshold",
+      "description": "Grade threshold cutoffs",
+      "type": "object",
+      "properties": {
+        "level": { "type": "string" },
+        "minScore": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "color": { "type": "string" }
+      }
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "System event audit trail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/systemSettings/{settingId}": {
+      "schema": "SystemSettings",
+      "description": "System wide settings"
+    },
+    "/gradeThresholds/{docId}": {
+      "schema": "GradeThreshold",
+      "description": "Grade threshold cutoffs"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Staff, evaluator, and admin user records"
+    },
+    "/committeeGroups/{groupId}": {
+      "schema": "CommitteeGroup",
+      "description": "Evaluation committee groups"
+    },
+    "/targetPositionGroups/{groupId}": {
+      "schema": "TargetPositionGroup",
+      "description": "Target job position categories"
+    },
+    "/formTemplates/{templateId}": {
+      "schema": "FormTemplate",
+      "description": "Evaluation form templates"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "EvaluationSubmission",
+      "description": "Individual evaluator scoring submissions"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit trail entries"
+    }
+  }
+}
