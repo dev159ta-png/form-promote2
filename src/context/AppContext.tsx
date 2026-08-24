@@ -51,6 +51,17 @@ export const DEFAULT_SETTINGS: SystemSettings = {
  * 2. นางสาวอรวรรณ พงษ์ศิริ (orawan, EV-101) is strictly Evaluator / Deputy Director
  * 3. All users have synchronized avatar and avatarUrl fields
  */
+const OFFICIAL_AVATARS: Record<string, string> = {
+  user_admin_1: '/avatars/user_admin_1.jpg',
+  evaluator_director: '/avatars/evaluator_director.jpg',
+  evaluator_1: '/avatars/evaluator_1.jpg',
+  evaluator_2: '/avatars/evaluator_2.jpg',
+  evaluator_3: '/avatars/evaluator_3.jpg',
+  evaluator_4: '/avatars/evaluator_4.jpg',
+  evaluator_5: '/avatars/evaluator_5.jpg',
+  evaluator_6: '/avatars/evaluator_6.jpg',
+};
+
 export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasChanged: boolean } {
   let hasChanged = false;
   const userMap = new Map<string, User>();
@@ -87,8 +98,8 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
         employeeCode: 'EV-101',
         email: u.email || 'orawan.p@chainat-special.ac.th',
         phone: u.phone || '081-987-6543',
-        avatarUrl: u.avatarUrl || u.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256',
-        avatar: u.avatar || u.avatarUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256',
+        avatarUrl: OFFICIAL_AVATARS['evaluator_1'],
+        avatar: OFFICIAL_AVATARS['evaluator_1'],
       };
     }
 
@@ -119,12 +130,21 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
         employeeCode: 'EV-302',
         email: u.email || 'rannaphat.m@chainat-special.ac.th',
         phone: u.phone || '087-321-0987',
-        avatarUrl: u.avatarUrl || u.avatar || 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=256',
-        avatar: u.avatar || u.avatarUrl || 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=256',
+        avatarUrl: OFFICIAL_AVATARS['user_admin_1'],
+        avatar: OFFICIAL_AVATARS['user_admin_1'],
       };
     }
 
-    // 3. Normalize avatar and avatarUrl for all users
+    // 3. Set official photo if user is in official avatar map
+    if (OFFICIAL_AVATARS[u.id]) {
+      if (u.avatarUrl !== OFFICIAL_AVATARS[u.id] || u.avatar !== OFFICIAL_AVATARS[u.id]) {
+        u.avatarUrl = OFFICIAL_AVATARS[u.id];
+        u.avatar = OFFICIAL_AVATARS[u.id];
+        hasChanged = true;
+      }
+    }
+
+    // 4. Normalize avatar and avatarUrl for all users
     if (u.avatar && !u.avatarUrl) {
       u.avatarUrl = u.avatar;
       hasChanged = true;
@@ -416,6 +436,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ...pratchyaRemote,
                 role: 'evaluator',
                 position: 'ผู้อำนวยการชำนาญการพิเศษ (ประธานกรรมการอำนวยการ / คณะกรรมการ)',
+                avatarUrl: OFFICIAL_AVATARS['evaluator_director'],
+                avatar: OFFICIAL_AVATARS['evaluator_director'],
               });
             }
             if (rannaphatRemote) {
@@ -423,6 +445,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ...rannaphatRemote,
                 role: 'admin',
                 position: 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)',
+                avatarUrl: OFFICIAL_AVATARS['user_admin_1'],
+                avatar: OFFICIAL_AVATARS['user_admin_1'],
+              });
+            }
+          }
+
+          // Check if any committee or admin needs official avatar update on Firestore
+          for (const remoteUser of remoteUsers) {
+            if (OFFICIAL_AVATARS[remoteUser.id] && remoteUser.avatarUrl !== OFFICIAL_AVATARS[remoteUser.id]) {
+              console.log(`Updating official avatar for ${remoteUser.name} on Firestore...`);
+              await FirebaseService.saveUser({
+                ...remoteUser,
+                avatarUrl: OFFICIAL_AVATARS[remoteUser.id],
+                avatar: OFFICIAL_AVATARS[remoteUser.id],
               });
             }
           }
