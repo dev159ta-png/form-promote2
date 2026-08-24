@@ -238,6 +238,17 @@ export function getFormTemplateForUser(
   // 2. Exact or substring match in positionTitle or code
   const cleanPos = (user.position || '').trim().toLowerCase();
 
+  // Specific check for ธุรการ / งานสารบรรณ
+  if (cleanPos.includes('ธุรการ') || cleanPos.includes('สารบรรณ') || (user.department && user.department.includes('ธุรการ'))) {
+    const clerkTemplate = templates.find(
+      (t) =>
+        t.id === 'form_support_clerical' ||
+        t.code === 'S-13' ||
+        t.positionTitle.includes('ธุรการ')
+    );
+    if (clerkTemplate) return clerkTemplate;
+  }
+
   // Specific check for พนักงานราชการ / ครูผู้สอน (กลุ่มที่ 3)
   if (
     user.positionGroup === 'government_employee_teacher' ||

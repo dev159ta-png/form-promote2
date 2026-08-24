@@ -344,13 +344,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
     if (saved) {
       try {
-        const parsed: FormTemplate[] = JSON.parse(saved);
+        let parsed: FormTemplate[] = JSON.parse(saved);
         const hasGovTeacher = parsed.some((t) => t.id === 'form_government_employee_teacher');
         if (!hasGovTeacher) {
           const govTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_government_employee_teacher');
-          if (govTemplate) {
-            return [...parsed, govTemplate];
-          }
+          if (govTemplate) parsed = [...parsed, govTemplate];
+        }
+        const hasClerical = parsed.some((t) => t.id === 'form_support_clerical');
+        if (!hasClerical) {
+          const clericalTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_support_clerical');
+          if (clericalTemplate) parsed = [...parsed, clericalTemplate];
         }
         return parsed;
       } catch (e) {
@@ -514,16 +517,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         unsubTemplates = FirebaseService.listenFormTemplates((remoteTemplates) => {
           if (remoteTemplates && remoteTemplates.length > 0) {
-            const hasGovTeacher = remoteTemplates.some((t) => t.id === 'form_government_employee_teacher');
+            let updatedList = [...remoteTemplates];
+            let modified = false;
+
+            const hasGovTeacher = updatedList.some((t) => t.id === 'form_government_employee_teacher');
             if (!hasGovTeacher) {
               const govTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_government_employee_teacher');
               if (govTemplate) {
                 FirebaseService.saveFormTemplate(govTemplate).catch(console.error);
-                setFormTemplates([...remoteTemplates, govTemplate]);
-                return;
+                updatedList.push(govTemplate);
+                modified = true;
               }
             }
-            setFormTemplates(remoteTemplates);
+
+            const hasClerical = updatedList.some((t) => t.id === 'form_support_clerical');
+            if (!hasClerical) {
+              const clericalTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_support_clerical');
+              if (clericalTemplate) {
+                FirebaseService.saveFormTemplate(clericalTemplate).catch(console.error);
+                updatedList.push(clericalTemplate);
+                modified = true;
+              }
+            }
+
+            setFormTemplates(updatedList);
           }
         });
 
