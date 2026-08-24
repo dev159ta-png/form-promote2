@@ -1,12 +1,10 @@
 {
-  "projectId": "fluent-lamp-b8chg",
-  "appId": "1:299805130160:web:e247eddc80502596a4aa75",
-  "apiKey": "AIzaSyC6WbPzxuq6UXiiBtAM7yZOT5DbjHnUOWA",
-  "authDomain": "fluent-lamp-b8chg.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-4c691e0c-d4c5-421c-9dac-ff9ae122e7b4",
-  "storageBucket": "fluent-lamp-b8chg.firebasestorage.app",
-  "messagingSenderId": "299805130160",
-  "measurementId": "",
-  "oAuthClientId": "299805130160-smvhm6c74beg7v7qi2a4ou9f9piqkv0h.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "projectId": "form-promote2",
+  "appId": "1:464118821297:web:bbf457fb51f5ccdb600d90",
+  "apiKey": "AIzaSyBq1eY_9GaobKcEEFQAqea_t9gicB3FB18",
+  "authDomain": "form-promote2.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "form-promote2.firebasestorage.app",
+  "messagingSenderId": "464118821297",
+  "measurementId": "G-RT7PWNP2EM"
 }

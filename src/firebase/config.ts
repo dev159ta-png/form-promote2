@@ -1,26 +1,35 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Firebase Configuration from firebase-applet-config.json
+// Firebase Configuration from user
 export const firebaseConfig = {
-  apiKey: "AIzaSyD8j0Y0G7c8EXjPEOv592MwFpqP3O4Bn-8",
-  authDomain: "promote-b4836.firebaseapp.com",
-  projectId: "promote-b4836",
-  storageBucket: "promote-b4836.firebasestorage.app",
-  messagingSenderId: "102722636633",
-  appId: "1:102722636633:web:01502a30b78486d3ac9a48",
-  measurementId: "G-5ZB8RPFV8P",
-  firestoreDatabaseId: "ai-studio-remixremix-b7816f08-e069-4688-8e93-9dba97faf135",
-  oAuthClientId: "102722636633-hhoup1r3p8q5v68o65gso28di4seudch.apps.googleusercontent.com",
+  apiKey: "AIzaSyBq1eY_9GaobKcEEFQAqea_t9gicB3FB18",
+  authDomain: "form-promote2.firebaseapp.com",
+  projectId: "form-promote2",
+  storageBucket: "form-promote2.firebasestorage.app",
+  messagingSenderId: "464118821297",
+  appId: "1:464118821297:web:bbf457fb51f5ccdb600d90",
+  measurementId: "G-RT7PWNP2EM"
 };
 
 // Initialize Firebase App instance safely
 export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with the exact provisioned database ID & Auth
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Initialize Firestore (default database of form-promote2) & Auth
+export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Initialize Analytics conditionally
+export let analytics: any = null;
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  }).catch(() => {});
+}
 
 export enum OperationType {
   CREATE = 'create',

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { PRESET_LOGOS, PES_GOLD_LOGO } from '../data/presetLogos';
 import { TargetPositionGroupModal } from './TargetPositionGroupModal';
+import { firebaseConfig } from '../firebase/config';
 
 export const SystemSettingsView: React.FC = () => {
   const {
@@ -851,7 +852,7 @@ export const SystemSettingsView: React.FC = () => {
               <div className="text-[11px] text-slate-600 space-y-1">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Project ID:</span>
-                  <span className="font-mono font-semibold text-slate-700">promote-b4836</span>
+                  <span className="font-mono font-semibold text-slate-700">{firebaseConfig.projectId}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Database:</span>
