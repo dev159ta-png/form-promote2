@@ -201,7 +201,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={handleManualSync}
                 disabled={isFirebaseSyncing}
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 border border-slate-200/80 text-[11px] font-semibold text-slate-700 transition cursor-pointer shadow-2xs"
+                className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 border border-slate-200/80 text-[11px] font-semibold text-slate-700 transition cursor-pointer shadow-2xs"
                 title="คลิกเพื่อซิงค์ข้อมูลล่าสุดกับ Firebase Cloud ทันที (เชื่อมต่อสด PC, iOS, Android)"
               >
                 {isFirebaseSyncing ? (
@@ -213,7 +213,7 @@ export const Navbar: React.FC = () => {
                   </span>
                 )}
                 <Cloud className="w-3.5 h-3.5 text-blue-600" />
-                <span className="text-slate-600 text-[11px]">
+                <span className="text-slate-600 text-[11px] hidden sm:inline">
                   {isFirebaseSyncing ? 'กำลังซิงค์...' : 'Cloud Realtime'}
                 </span>
               </button>

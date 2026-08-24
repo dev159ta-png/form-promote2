@@ -437,14 +437,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         unsubUsers = FirebaseService.listenUsers((remoteUsers) => {
           if (remoteUsers && remoteUsers.length > 0) {
-            const { sanitized, hasChanged } = sanitizeAndFixUsers(remoteUsers);
+            const { sanitized } = sanitizeAndFixUsers(remoteUsers);
             setUsers(sanitized);
-            if (hasChanged) {
-              console.log('Sanitized duplicate/corrupt admin/evaluator roles and updated Firebase...');
-              sanitized.forEach((u) => {
-                FirebaseService.saveUser(u).catch(console.error);
-              });
-            }
           }
         });
 

@@ -35,6 +35,19 @@ const SETTINGS_COLLECTION = 'systemSettings';
 const LOGS_COLLECTION = 'auditLogs';
 const THRESHOLDS_COLLECTION = 'gradeThresholds';
 
+/**
+ * Strips undefined values and deep copies objects so Firestore never rejects data
+ */
+function sanitizeForFirestore<T>(data: T): T {
+  if (data === null || data === undefined) return data;
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => {
+      if (value === undefined) return null;
+      return value;
+    })
+  );
+}
+
 export const FirebaseService = {
   // ----------------------------------------------------
   // System Settings
@@ -56,7 +69,8 @@ export const FirebaseService = {
   async saveSystemSettings(settings: SystemSettings): Promise<void> {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, 'current');
-      await setDoc(docRef, { ...settings, updatedAt: new Date().toISOString() }, { merge: true });
+      const cleanData = sanitizeForFirestore({ ...settings, updatedAt: new Date().toISOString() });
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving system settings to Firebase:', error);
       throw error;
@@ -96,7 +110,8 @@ export const FirebaseService = {
   async saveUser(user: User): Promise<void> {
     try {
       const docRef = doc(db, USERS_COLLECTION, user.id);
-      await setDoc(docRef, user, { merge: true });
+      const cleanData = sanitizeForFirestore(user);
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving user to Firebase:', error);
       throw error;
@@ -143,7 +158,8 @@ export const FirebaseService = {
   async saveCommitteeGroup(group: CommitteeGroup): Promise<void> {
     try {
       const docRef = doc(db, GROUPS_COLLECTION, group.id);
-      await setDoc(docRef, group, { merge: true });
+      const cleanData = sanitizeForFirestore(group);
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving group to Firebase:', error);
       throw error;
@@ -190,7 +206,8 @@ export const FirebaseService = {
   async saveTargetPositionGroup(group: TargetPositionGroup): Promise<void> {
     try {
       const docRef = doc(db, TARGET_GROUPS_COLLECTION, group.id);
-      await setDoc(docRef, { ...group, updatedAt: new Date().toISOString() }, { merge: true });
+      const cleanData = sanitizeForFirestore({ ...group, updatedAt: new Date().toISOString() });
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving target position group to Firebase:', error);
       throw error;
@@ -238,7 +255,8 @@ export const FirebaseService = {
   async saveFormTemplate(template: FormTemplate): Promise<void> {
     try {
       const docRef = doc(db, TEMPLATES_COLLECTION, template.id);
-      await setDoc(docRef, template, { merge: true });
+      const cleanData = sanitizeForFirestore(template);
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving template to Firebase:', error);
       throw error;
@@ -285,7 +303,8 @@ export const FirebaseService = {
   async saveSubmission(submission: EvaluationSubmission): Promise<void> {
     try {
       const docRef = doc(db, SUBMISSIONS_COLLECTION, submission.id);
-      await setDoc(docRef, submission, { merge: true });
+      const cleanData = sanitizeForFirestore(submission);
+      await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
       console.error('Error saving submission to Firebase:', error);
       throw error;
@@ -320,7 +339,8 @@ export const FirebaseService = {
   async saveGradeThresholds(thresholds: GradeThreshold[]): Promise<void> {
     try {
       const docRef = doc(db, THRESHOLDS_COLLECTION, 'current');
-      await setDoc(docRef, { thresholds, updatedAt: new Date().toISOString() });
+      const cleanData = sanitizeForFirestore({ thresholds, updatedAt: new Date().toISOString() });
+      await setDoc(docRef, cleanData);
     } catch (error) {
       console.error('Error saving thresholds to Firebase:', error);
     }
@@ -350,7 +370,8 @@ export const FirebaseService = {
   async addAuditLog(log: AuditLog): Promise<void> {
     try {
       const docRef = doc(db, LOGS_COLLECTION, log.id);
-      await setDoc(docRef, log);
+      const cleanData = sanitizeForFirestore(log);
+      await setDoc(docRef, cleanData);
     } catch (error) {
       console.error('Error saving audit log to Firebase:', error);
     }
@@ -393,52 +414,69 @@ export const FirebaseService = {
     targetGroups?: TargetPositionGroup[]
   ): Promise<void> {
     try {
-      const batch = writeBatch(db);
-
-      // 1. Settings
-      const settingsRef = doc(db, SETTINGS_COLLECTION, 'current');
-      batch.set(settingsRef, settings);
-
-      // 2. Users
-      users.forEach((user) => {
-        const uRef = doc(db, USERS_COLLECTION, user.id);
-        batch.set(uRef, user);
-      });
-
-      // 3. Groups
-      groups.forEach((group) => {
-        const gRef = doc(db, GROUPS_COLLECTION, group.id);
-        batch.set(gRef, group);
-      });
-
-      // 3.1 Target Position Groups
-      if (targetGroups && targetGroups.length > 0) {
-        targetGroups.forEach((tg) => {
-          const tgRef = doc(db, TARGET_GROUPS_COLLECTION, tg.id);
-          batch.set(tgRef, tg);
-        });
+      // 1. Save Settings
+      if (settings) {
+        const settingsRef = doc(db, SETTINGS_COLLECTION, 'current');
+        await setDoc(settingsRef, sanitizeForFirestore({ ...settings, updatedAt: new Date().toISOString() }));
       }
 
-      // 4. Templates
-      templates.forEach((tmpl) => {
-        const tRef = doc(db, TEMPLATES_COLLECTION, tmpl.id);
-        batch.set(tRef, tmpl);
-      });
-
-      // 5. Submissions
-      submissions.forEach((sub) => {
-        const sRef = doc(db, SUBMISSIONS_COLLECTION, sub.id);
-        batch.set(sRef, sub);
-      });
-
-      // 6. Thresholds
-      if (thresholds) {
+      // 2. Save Thresholds
+      if (thresholds && thresholds.length > 0) {
         const threshRef = doc(db, THRESHOLDS_COLLECTION, 'current');
-        batch.set(threshRef, { thresholds, updatedAt: new Date().toISOString() });
+        await setDoc(threshRef, sanitizeForFirestore({ thresholds, updatedAt: new Date().toISOString() }));
       }
 
-      await batch.commit();
-      console.log('Firebase Firestore initialized and seeded successfully across all collections!');
+      // 3. Save Committee Groups
+      if (groups && groups.length > 0) {
+        for (const g of groups) {
+          const gRef = doc(db, GROUPS_COLLECTION, g.id);
+          await setDoc(gRef, sanitizeForFirestore(g), { merge: true });
+        }
+      }
+
+      // 4. Save Target Position Groups
+      if (targetGroups && targetGroups.length > 0) {
+        for (const tg of targetGroups) {
+          const tgRef = doc(db, TARGET_GROUPS_COLLECTION, tg.id);
+          await setDoc(tgRef, sanitizeForFirestore({ ...tg, updatedAt: new Date().toISOString() }), { merge: true });
+        }
+      }
+
+      // 5. Save Form Templates (one by one to prevent batch size overflow)
+      if (templates && templates.length > 0) {
+        for (const tmpl of templates) {
+          const tRef = doc(db, TEMPLATES_COLLECTION, tmpl.id);
+          await setDoc(tRef, sanitizeForFirestore(tmpl), { merge: true });
+        }
+      }
+
+      // 6. Save Users in batches of 20
+      if (users && users.length > 0) {
+        for (let i = 0; i < users.length; i += 20) {
+          const batch = writeBatch(db);
+          const chunk = users.slice(i, i + 20);
+          chunk.forEach((u) => {
+            const uRef = doc(db, USERS_COLLECTION, u.id);
+            batch.set(uRef, sanitizeForFirestore(u), { merge: true });
+          });
+          await batch.commit();
+        }
+      }
+
+      // 7. Save Submissions in batches
+      if (submissions && submissions.length > 0) {
+        for (let i = 0; i < submissions.length; i += 20) {
+          const batch = writeBatch(db);
+          const chunk = submissions.slice(i, i + 20);
+          chunk.forEach((s) => {
+            const sRef = doc(db, SUBMISSIONS_COLLECTION, s.id);
+            batch.set(sRef, sanitizeForFirestore(s), { merge: true });
+          });
+          await batch.commit();
+        }
+      }
+
+      console.log('Firebase Firestore synchronized successfully across all collections!');
     } catch (error) {
       console.error('Error seeding Firebase data:', error);
       throw error;
