@@ -327,13 +327,21 @@ export const UserManagementView: React.FC = () => {
 
   const handleOpenEditModal = (user: User) => {
     const defaultForm = getFormTemplateForUser(user, formTemplates);
+    const resolvedGroup: PositionGroup =
+      user.positionGroup ||
+      (user.position.includes('พนักงานราชการ') || (user.position.includes('ครูผู้สอน') && !user.position.includes('ครูผู้ช่วย'))
+        ? 'government_employee_teacher'
+        : user.position.includes('ครูผู้ช่วย')
+        ? 'teacher_assistant'
+        : 'support_staff');
+
     setEditingUser(user);
     setFormData({
       name: user.name,
       username: user.username || '',
       password: user.password || 'password123',
       role: user.role,
-      positionGroup: user.positionGroup || (user.position.includes('ครูผู้ช่วย') ? 'teacher_assistant' : 'support_staff'),
+      positionGroup: resolvedGroup,
       position: user.position,
       department: user.department,
       email: user.email || '',
@@ -354,6 +362,46 @@ export const UserManagementView: React.FC = () => {
           }
         : defaultLeaveStats,
     });
+  };
+
+  const handlePositionChange = (newPos: string) => {
+    let newGroup: PositionGroup = formData.positionGroup;
+    let newTemplateId = formData.formTemplateId;
+
+    if (
+      newPos.includes('พนักงานราชการ') ||
+      (newPos.includes('ครูผู้สอน') && !newPos.includes('ครูผู้ช่วย'))
+    ) {
+      newGroup = 'government_employee_teacher';
+      const govTmpl = formTemplates.find(
+        (t) => t.id === 'form_government_employee_teacher' || t.group === 'government_employee_teacher'
+      );
+      if (govTmpl) newTemplateId = govTmpl.id;
+    } else if (newPos.includes('ครูผู้ช่วย')) {
+      newGroup = 'teacher_assistant';
+      const taTmpl = formTemplates.find(
+        (t) => t.id === 'form_teacher_assistant' || t.group === 'teacher_assistant'
+      );
+      if (taTmpl) newTemplateId = taTmpl.id;
+    } else {
+      newGroup = 'support_staff';
+      if (newPos.includes('ธุรการ') || newPos.includes('สารบรรณ')) {
+        const clerkTmpl = formTemplates.find((t) => t.id === 'form_support_clerical');
+        if (clerkTmpl) newTemplateId = clerkTmpl.id;
+      } else {
+        const supportTmpl =
+          formTemplates.find((t) => t.positionTitle && newPos.includes(t.positionTitle)) ||
+          formTemplates.find((t) => t.group === 'support_staff');
+        if (supportTmpl) newTemplateId = supportTmpl.id;
+      }
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      position: newPos,
+      positionGroup: newGroup,
+      formTemplateId: newTemplateId,
+    }));
   };
 
   // Image Upload helper (converts to optimized compressed base64 Data URL)
@@ -1025,14 +1073,17 @@ export const UserManagementView: React.FC = () => {
                 {formData.role === 'staff' ? (
                   <select
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none bg-white"
+                    onChange={(e) => handlePositionChange(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none bg-white font-medium text-slate-900"
                   >
-                    <optgroup label="กลุ่มที่ 1: ครูผู้ช่วย">
+                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">
                       <option value="ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย</option>
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 2: จ้างเหมาบริการ สายสนับสนุน (12 ตำแหน่ง)">
-                      {STANDARD_POSITIONS_13.slice(1).map((pos) => (
+                    <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
+                      <option value="พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน</option>
+                    </optgroup>
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ / ลูกจ้างชั่วคราว สายสนับสนุน (13 ตำแหน่ง)">
+                      {STANDARD_POSITIONS_13.filter((p) => p.group === 'support_staff').map((pos) => (
                         <option key={pos.code} value={pos.title}>
                           {pos.title}
                         </option>
@@ -1323,15 +1374,45 @@ export const UserManagementView: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  ตำแหน่งงาน
+                  ตำแหน่งงาน (Position) <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 outline-none"
-                />
+                {formData.role === 'staff' ? (
+                  <select
+                    value={formData.position}
+                    onChange={(e) => handlePositionChange(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none bg-white font-medium text-slate-900"
+                  >
+                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">
+                      <option value="ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย</option>
+                    </optgroup>
+                    <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
+                      <option value="พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน</option>
+                    </optgroup>
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ / ลูกจ้างชั่วคราว สายสนับสนุน (13 ตำแหน่ง)">
+                      {STANDARD_POSITIONS_13.filter((p) => p.group === 'support_staff').map((pos) => (
+                        <option key={pos.code} value={pos.title}>
+                          {pos.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                    {formData.position &&
+                      formData.position !== 'ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย' &&
+                      formData.position !== 'พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน' &&
+                      !STANDARD_POSITIONS_13.some((p) => p.title === formData.position) && (
+                        <optgroup label="ตำแหน่งเดิม / กำหนดเอง">
+                          <option value={formData.position}>{formData.position}</option>
+                        </optgroup>
+                      )}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 outline-none"
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
