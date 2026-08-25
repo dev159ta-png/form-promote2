@@ -93,12 +93,30 @@ export function calculateAggregatedResult(
   submissions: EvaluationSubmission[],
   thresholds: GradeThreshold[] = GRADE_THRESHOLDS
 ): AggregatedResult {
-  // Filter submissions for this evaluatee and group that are not drafts
-  const validSubmissions = submissions.filter(
-    (s) => s.evaluateeId === evaluatee.id && s.groupId === group.id && !s.isDraft
-  );
+  // Deduplicate submissions for this evaluatee by evaluatorId (keeping latest submission)
+  const evalMap = new Map<string, EvaluationSubmission>();
+  
+  // Sort submissions chronologically so latest overwrites earlier
+  const sortedSubs = [...submissions]
+    .filter((s) => s.evaluateeId === evaluatee.id && !s.isDraft)
+    .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
 
-  const totalCommitteeCount = group.evaluatorIds.length;
+  sortedSubs.forEach((s) => {
+    evalMap.set(s.evaluatorId, s);
+  });
+
+  // Only take submissions from evaluators belonging to this committee group (or matching group)
+  const assignedEvaluatorSet = new Set(group.evaluatorIds || []);
+  const validSubmissions: EvaluationSubmission[] = [];
+
+  evalMap.forEach((sub, evalId) => {
+    if (assignedEvaluatorSet.size === 0 || assignedEvaluatorSet.has(evalId) || sub.groupId === group.id) {
+      validSubmissions.push(sub);
+    }
+  });
+
+  const totalCommitteeCount = group.evaluatorIds.length || 3;
+  // Count unique evaluators who actually completed the evaluation
   const submittedCommitteeCount = validSubmissions.length;
   const isFullyEvaluated = submittedCommitteeCount >= totalCommitteeCount && totalCommitteeCount > 0;
 

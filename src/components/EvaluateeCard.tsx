@@ -64,9 +64,17 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
     .map((id) => users.find((u) => u.id === id))
     .filter((u): u is User => Boolean(u));
 
+  // Count uniquely completed evaluators
+  const completedEvaluatorsCount = groupEvaluators.filter((ev) =>
+    submissions.some((s) => s.evaluatorId === ev.id && !s.isDraft)
+  ).length;
+
+  const totalEvaluatorsCount = groupEvaluators.length || totalCommitteeCount || 3;
+  const isAllEvaluated = completedEvaluatorsCount >= totalEvaluatorsCount && totalEvaluatorsCount > 0;
+
   // Percentage of committee completion
   const progressPercent =
-    totalCommitteeCount > 0 ? (submittedCommitteeCount / totalCommitteeCount) * 100 : 0;
+    totalEvaluatorsCount > 0 ? (completedEvaluatorsCount / totalEvaluatorsCount) * 100 : 0;
 
   // Format evaluation date
   const evaluationDateStr =
@@ -159,7 +167,7 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
 
           {/* Right Side: Score Box (Image 1 Style) */}
           <div className="text-right shrink-0">
-            {submittedCommitteeCount > 0 ? (
+            {completedEvaluatorsCount > 0 ? (
               <div className="bg-teal-50/80 border border-teal-100 rounded-2xl p-2 sm:px-3 text-center min-w-[85px]">
                 <div className="text-base sm:text-lg font-black text-teal-800 leading-none">
                   {item.meanPercentage.toFixed(item.meanPercentage % 1 === 0 ? 0 : 2)}%
@@ -182,10 +190,10 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
         <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-600 font-medium">
-              ประเมินแล้ว {submittedCommitteeCount} จาก {totalCommitteeCount} ท่าน คะแนนรวม
+              ประเมินแล้ว {completedEvaluatorsCount} จาก {totalEvaluatorsCount} ท่าน คะแนนรวม
             </span>
             <span className="font-mono text-slate-500 font-bold">
-              {submittedCommitteeCount}/{totalCommitteeCount}
+              {completedEvaluatorsCount}/{totalEvaluatorsCount}
             </span>
           </div>
 
@@ -193,9 +201,9 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
           <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div
               className={`h-full transition-all duration-500 ${
-                isFullyEvaluated
+                isAllEvaluated
                   ? 'bg-emerald-500'
-                  : submittedCommitteeCount > 0
+                  : completedEvaluatorsCount > 0
                   ? 'bg-teal-500'
                   : 'bg-slate-300'
               }`}

@@ -48,7 +48,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 
   if (!item) return null;
 
-  const { evaluatee, submissions, submittedCommitteeCount, totalCommitteeCount, isFullyEvaluated } = item;
+  const { evaluatee, submissions, gradeThresholds: itemThresholds } = item;
   const gradeInfo = getGradeInfo(item.finalGrade, gradeThresholds);
 
   // Find committee group
@@ -59,8 +59,15 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
     .map((id) => users.find((u) => u.id === id))
     .filter((u): u is User => Boolean(u));
 
+  // Count uniquely completed evaluators (people who have submitted)
+  const completedEvaluatorsCount = groupEvaluators.filter((ev) =>
+    submissions.some((s) => s.evaluatorId === ev.id && !s.isDraft)
+  ).length;
+
+  const totalEvaluatorsCount = groupEvaluators.length || item.totalCommitteeCount || 3;
+
   // Progress percentage
-  const progressPercent = totalCommitteeCount > 0 ? (submittedCommitteeCount / totalCommitteeCount) * 100 : 0;
+  const progressPercent = totalEvaluatorsCount > 0 ? (completedEvaluatorsCount / totalEvaluatorsCount) * 100 : 0;
 
   // Format date helper
   const evaluationDateStr = submissions.length > 0 
@@ -130,7 +137,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 
                 {/* Right Side: Large Score Display Box (Image 2) */}
                 <div className="bg-white/95 rounded-2xl p-3 sm:px-5 sm:py-3 text-center shadow-md min-w-[120px] shrink-0 self-stretch sm:self-auto flex sm:flex-col justify-between sm:justify-center items-center">
-                  {submittedCommitteeCount > 0 ? (
+                  {completedEvaluatorsCount > 0 ? (
                     <>
                       <div className="text-2xl sm:text-3xl font-black text-sky-700 leading-tight">
                         {item.meanPercentage.toFixed(item.meanPercentage % 1 === 0 ? 0 : 2)}%
@@ -159,7 +166,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                     <span>ความคืบหน้าการประเมิน</span>
                   </div>
                   <span className="font-mono text-white">
-                    {submittedCommitteeCount}/{totalCommitteeCount} ท่าน
+                    {completedEvaluatorsCount}/{totalEvaluatorsCount} ท่าน
                   </span>
                 </div>
 
@@ -294,8 +301,8 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                   <Users className="w-4 h-4 text-blue-600" />
                   <span>คณะกรรมการการประเมิน & การให้คะแนน</span>
                 </div>
-                <span className="text-xs text-slate-500">
-                  ประเมินแล้ว {submittedCommitteeCount} จาก {totalCommitteeCount} ท่าน
+                <span className="text-xs text-slate-500 font-medium">
+                  ประเมินแล้ว {completedEvaluatorsCount} จาก {totalEvaluatorsCount} ท่าน
                 </span>
               </div>
 

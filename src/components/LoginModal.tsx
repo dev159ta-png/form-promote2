@@ -28,12 +28,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onClose,
   isMandatory = false,
 }) => {
-  const { users, login, loginAsUser, currentUser } = useApp();
-  const [activeTab, setActiveTab] = useState<'demo' | 'credentials'>('demo');
+  const { users, login, loginAsUser, currentUser, systemSettings } = useApp();
+  const isDemoEnabled = systemSettings?.isDemoMode ?? true;
+  const [activeTab, setActiveTab] = useState<'demo' | 'credentials'>(
+    isDemoEnabled ? 'demo' : 'credentials'
+  );
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [demoRoleFilter, setDemoRoleFilter] = useState<'all' | 'admin' | 'evaluator' | 'teacher' | 'support'>('all');
+
+  // If demo mode is turned off by admin, force credentials tab
+  const currentTab = isDemoEnabled ? activeTab : 'credentials';
 
   if (!isOpen) return null;
 
@@ -96,40 +102,47 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             )}
           </div>
 
-          {/* Tab Selector */}
-          <div className="flex items-center gap-2 mt-5 p-1 bg-black/20 rounded-xl max-w-md">
-            <button
-              type="button"
-              onClick={() => setActiveTab('demo')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
-                activeTab === 'demo'
-                  ? 'bg-white text-slate-900 shadow-md'
-                  : 'text-blue-100 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>โหมดทดลองใช้งาน (Demo 1-Click)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('credentials')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
-                activeTab === 'credentials'
-                  ? 'bg-white text-slate-900 shadow-md'
-                  : 'text-blue-100 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <KeyRound className="w-4 h-4 text-blue-600" />
-              <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
-            </button>
-          </div>
+          {/* Tab Selector (Only show if demo mode is enabled) */}
+          {isDemoEnabled ? (
+            <div className="flex items-center gap-2 mt-5 p-1 bg-black/20 rounded-xl max-w-md">
+              <button
+                type="button"
+                onClick={() => setActiveTab('demo')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
+                  currentTab === 'demo'
+                    ? 'bg-white text-slate-900 shadow-md'
+                    : 'text-blue-100 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>โหมดทดลองใช้งาน (Demo 1-Click)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('credentials')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer ${
+                  currentTab === 'credentials'
+                    ? 'bg-white text-slate-900 shadow-md'
+                    : 'text-blue-100 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <KeyRound className="w-4 h-4 text-blue-600" />
+                <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/25 text-xs text-blue-200">
+              <KeyRound className="w-3.5 h-3.5 text-blue-300" />
+              <span>เข้าสู่ระบบอย่างเป็นทางการด้วยชื่อผู้ใช้และรหัสผ่าน</span>
+            </div>
+          )}
         </div>
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 max-h-[75vh] overflow-y-auto">
           
           {/* TAB 1: DEMO QUICK LOGIN */}
-          {activeTab === 'demo' && (
+          {currentTab === 'demo' && isDemoEnabled && (
             <div className="space-y-5">
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-3.5 flex items-start gap-3">
                 <Shield className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
@@ -377,7 +390,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           )}
 
           {/* TAB 2: USERNAME & PASSWORD LOGIN */}
-          {activeTab === 'credentials' && (
+          {currentTab === 'credentials' && (
             <form onSubmit={handleCredentialsSubmit} className="space-y-4 max-w-md mx-auto py-2">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto mb-2 shadow-xs">

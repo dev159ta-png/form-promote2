@@ -546,7 +546,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         unsubSubs = FirebaseService.listenSubmissions((remoteSubs) => {
           if (remoteSubs) {
-            setSubmissions(remoteSubs);
+            // Deduplicate remote submissions by evaluateeId and evaluatorId, keeping latest submittedAt
+            const subMap = new Map<string, EvaluationSubmission>();
+            const sorted = [...remoteSubs].sort(
+              (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
+            );
+            const duplicatesToDelete: string[] = [];
+
+            sorted.forEach((sub) => {
+              const key = `${sub.evaluateeId}_${sub.evaluatorId}`;
+              const prev = subMap.get(key);
+              if (prev && prev.id !== sub.id) {
+                duplicatesToDelete.push(prev.id);
+              }
+              subMap.set(key, sub);
+            });
+
+            // Clean up duplicate documents from Firestore
+            duplicatesToDelete.forEach((dupId) => {
+              FirebaseService.deleteSubmission(dupId).catch(console.error);
+            });
+
+            setSubmissions(Array.from(subMap.values()));
           }
         });
 
@@ -748,17 +769,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const submitEvaluation = async (
     data: Omit<EvaluationSubmission, 'id' | 'submittedAt'>
   ): Promise<EvaluationSubmission> => {
-    const newId = 'sub_' + Date.now();
+    // Find existing submission if already evaluated
+    const existing = submissions.find(
+      (s) => s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId
+    );
+    const submissionId = existing?.id || 'sub_' + Date.now();
+
     const newSubmission: EvaluationSubmission = {
       ...data,
-      id: newId,
+      id: submissionId,
       submittedAt: new Date().toISOString(),
       isDraft: false,
     };
 
     setSubmissions((prev) => {
       const filtered = prev.filter(
-        (s) => !(s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId)
+        (s) =>
+          !(s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId) &&
+          s.id !== submissionId
       );
       return [newSubmission, ...filtered];
     });
@@ -768,9 +796,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Save to Firebase (triggers real-time broadcast to all connected devices)
     FirebaseService.saveSubmission(newSubmission).catch(console.error);
 
+    // If there were other duplicate submissions for this evaluator & evaluatee, clean them up from Firestore
+    const duplicates = submissions.filter(
+      (s) => s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId && s.id !== submissionId
+    );
+    duplicates.forEach((dup) => {
+      FirebaseService.deleteSubmission(dup.id).catch(console.error);
+    });
+
     logAudit(
       'SUBMIT_EVALUATION',
-      `ส่งผลการประเมินให้แก่ ${data.evaluateeName} (${data.evaluateePosition}) ได้คะแนน ${data.percentage}% [${data.grade}]`
+      `${existing ? 'แก้ไขผลการประเมิน' : 'ส่งผลการประเมิน'}ให้แก่ ${data.evaluateeName} (${data.evaluateePosition}) ได้คะแนน ${data.percentage}% [${data.grade}]`
     );
 
     return newSubmission;
