@@ -296,6 +296,7 @@ export const UserManagementView: React.FC = () => {
     email: '',
     phone: '',
     employeeCode: '',
+    positionNumber: '',
     formTemplateId: 'form_support_laborer',
     avatar: '',
     leaveStats: defaultLeaveStats,
@@ -314,6 +315,7 @@ export const UserManagementView: React.FC = () => {
       email: '',
       phone: '',
       employeeCode: '',
+      positionNumber: '',
       formTemplateId: defaultForm,
       avatar: '',
       leaveStats: defaultLeaveStats,
@@ -347,6 +349,7 @@ export const UserManagementView: React.FC = () => {
       email: user.email || '',
       phone: user.phone || '',
       employeeCode: user.employeeCode || '',
+      positionNumber: user.positionNumber || '',
       formTemplateId: user.formTemplateId || defaultForm.id,
       avatar: user.avatar || '',
       leaveStats: user.leaveStats
@@ -439,6 +442,7 @@ export const UserManagementView: React.FC = () => {
       email: formData.email || `${formData.username || 'user'}@school.ac.th`,
       phone: formData.phone,
       employeeCode: formData.employeeCode,
+      positionNumber: formData.positionNumber,
       avatar: formData.avatar || undefined,
       avatarUrl: formData.avatar || undefined,
       leaveStats: formData.role === 'staff' ? formData.leaveStats : undefined,
@@ -465,6 +469,7 @@ export const UserManagementView: React.FC = () => {
       email: formData.email,
       phone: formData.phone,
       employeeCode: formData.employeeCode,
+      positionNumber: formData.positionNumber,
       avatar: formData.avatar || undefined,
       avatarUrl: formData.avatar || undefined,
       leaveStats: formData.role === 'staff' ? formData.leaveStats : undefined,
@@ -715,6 +720,11 @@ export const UserManagementView: React.FC = () => {
                       </div>
                       <div className="text-[11px] text-slate-500 font-mono">
                         User: <strong className="text-blue-700">{user.username || 'user'}</strong> | รหัส: {user.employeeCode || user.id}
+                        {user.positionNumber && (
+                          <span className="ml-1.5 text-indigo-700 font-sans font-semibold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">
+                            เลขที่: {user.positionNumber}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -902,7 +912,7 @@ export const UserManagementView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     รหัสผ่าน (Password)
@@ -926,6 +936,19 @@ export const UserManagementView: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
                     placeholder="เช่น S-013, T-004"
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    ตำแหน่งเลขที่ (Position No.)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.positionNumber}
+                    onChange={(e) => setFormData({ ...formData, positionNumber: e.target.value })}
+                    placeholder="เช่น พ-1042, 1045"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none bg-blue-50/30"
                   />
                 </div>
               </div>
@@ -1215,7 +1238,7 @@ export const UserManagementView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     บทบาท (Role)
@@ -1239,7 +1262,21 @@ export const UserManagementView: React.FC = () => {
                     type="text"
                     value={formData.employeeCode}
                     onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
+                    placeholder="เช่น S-013"
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    ตำแหน่งเลขที่
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.positionNumber}
+                    onChange={(e) => setFormData({ ...formData, positionNumber: e.target.value })}
+                    placeholder="เช่น พ-1042"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-blue-600 outline-none bg-blue-50/30"
                   />
                 </div>
               </div>

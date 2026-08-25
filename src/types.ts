@@ -33,6 +33,7 @@ export interface User {
   groupId?: string; // ID of assigned committee group
   phone?: string;
   employeeCode?: string; // รหัสพนักงาน
+  positionNumber?: string; // ตำแหน่งเลขที่ (เช่น พ-1042 หรือ ลำดับที่ตำแหน่ง ที่แอดมินกำหนดล่วงหน้า)
   formTemplateId?: string; // รหัสแบบฟอร์มการประเมินที่กำหนดเฉพาะบุคคล
   leaveStats?: LeaveStats; // สถิติการมาทำงานและการลาที่แอดมินบันทึกไว้ล่วงหน้า
 }

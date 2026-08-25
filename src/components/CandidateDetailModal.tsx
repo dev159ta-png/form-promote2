@@ -20,9 +20,12 @@ import {
   ShieldCheck,
   UserCheck,
   Edit3,
+  Trash2,
+  Settings,
 } from 'lucide-react';
 import { getGradeInfo } from '../utils/evaluationCalculator';
 import { SingleEvaluationModal } from './SingleEvaluationModal';
+import { AdminEditSubmissionModal } from './AdminEditSubmissionModal';
 
 interface CandidateDetailModalProps {
   item: AggregatedResult | null;
@@ -41,6 +44,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 }) => {
   const { users, committeeGroups, currentUser, systemSettings } = useApp();
   const [selectedSubmission, setSelectedSubmission] = useState<EvaluationSubmission | null>(null);
+  const [adminEditingSubmission, setAdminEditingSubmission] = useState<EvaluationSubmission | null>(null);
 
   if (!item) return null;
 
@@ -363,13 +367,13 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                           </span>
                         </div>
 
-                        {/* Action Buttons: View & Print (Image 2) */}
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-2">
-                          <div className="flex items-center gap-2">
+                        {/* Action Buttons: View & Print & Admin Manage (Image 2) */}
+                        <div className="flex flex-wrap items-center justify-between pt-2 border-t border-slate-100 gap-2">
+                          <div className="flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => setSelectedSubmission(submission)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
                               title="ดูรายละเอียดใบบันทึกคะแนน"
                             >
                               <Eye className="w-3.5 h-3.5 text-slate-500" />
@@ -379,7 +383,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                             <button
                               type="button"
                               onClick={() => setSelectedSubmission(submission)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
                               title="พิมพ์ใบคะแนนกรรมการ"
                             >
                               <Printer className="w-3.5 h-3.5 text-slate-500" />
@@ -387,19 +391,34 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                             </button>
                           </div>
 
-                          {isCurrentLoggedUser && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onClose();
-                                onEvaluate(evaluatee.id, item.formId);
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition cursor-pointer"
-                            >
-                              <Edit3 className="w-3 h-3" />
-                              <span>แก้ไข</span>
-                            </button>
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {/* Admin Controls */}
+                            {currentUser.role === 'admin' && (
+                              <button
+                                type="button"
+                                onClick={() => setAdminEditingSubmission(submission)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold transition cursor-pointer shadow-2xs"
+                                title="แอดมิน: แก้ไขคะแนนหรือลบผลการประเมินนี้"
+                              >
+                                <Settings className="w-3 h-3 text-amber-700" />
+                                <span>จัดการคะแนน</span>
+                              </button>
+                            )}
+
+                            {isCurrentLoggedUser && currentUser.role !== 'admin' && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onClose();
+                                  onEvaluate(evaluatee.id, item.formId);
+                                }}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition cursor-pointer"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                                <span>แก้ไข</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -489,6 +508,14 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           submission={selectedSubmission}
           onClose={() => setSelectedSubmission(null)}
           thresholds={gradeThresholds}
+        />
+      )}
+
+      {/* Admin Edit / Delete Submission Modal */}
+      {adminEditingSubmission && (
+        <AdminEditSubmissionModal
+          submission={adminEditingSubmission}
+          onClose={() => setAdminEditingSubmission(null)}
         />
       )}
     </>

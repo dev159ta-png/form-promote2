@@ -67,7 +67,9 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
 
   // Form State
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [positionNumber, setPositionNumber] = useState('พ-1042');
+  const [positionNumber, setPositionNumber] = useState(
+    currentEvaluatee?.positionNumber || currentEvaluatee?.employeeCode || 'พ-1042'
+  );
   const [startDate, setStartDate] = useState('2024-05-15');
 
   // Leave Stats (7 Categories: มาสาย, ลาป่วย, ลากิจส่วนตัว, ลาคลอดบุตร, ลาอุปสมบท/ฮัจย์, ขาดราชการ, อื่น ๆ)
@@ -135,7 +137,12 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
 
     if (existingSubmission) {
       setScores(existingSubmission.scores);
-      setPositionNumber(existingSubmission.positionNumber || currentEvaluatee.employeeCode || 'พ-1042');
+      setPositionNumber(
+        existingSubmission.positionNumber ||
+        currentEvaluatee.positionNumber ||
+        currentEvaluatee.employeeCode ||
+        'พ-1042'
+      );
       setStartDate(existingSubmission.startDate || '2024-05-15');
       if (existingSubmission.leaveStats) {
         setLeaveStats({
@@ -178,7 +185,12 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
     const draft = getDraftEvaluation(currentEvaluatee.id, currentForm.id);
     if (draft) {
       setScores(draft.scores || {});
-      setPositionNumber(draft.positionNumber || currentEvaluatee.employeeCode || 'พ-1042');
+      setPositionNumber(
+        draft.positionNumber ||
+        currentEvaluatee.positionNumber ||
+        currentEvaluatee.employeeCode ||
+        'พ-1042'
+      );
       setStartDate(draft.startDate || '2024-05-15');
       if (draft.leaveStats) {
         setLeaveStats({
@@ -220,7 +232,7 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
 
     // 3. Default clean form
     setScores({});
-    setPositionNumber(currentEvaluatee.employeeCode || 'พ-1042');
+    setPositionNumber(currentEvaluatee.positionNumber || currentEvaluatee.employeeCode || 'พ-1042');
     setStartDate('2024-05-15');
     if (prefilledStats) {
       setLeaveStats(prefilledStats);
