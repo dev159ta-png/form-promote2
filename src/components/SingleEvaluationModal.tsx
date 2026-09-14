@@ -17,7 +17,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { getGradeInfo } from '../utils/evaluationCalculator';
-import html2pdf from 'html2pdf.js';
+import { downloadSingleSubmissionPdf } from '../utils/pdfExport';
 
 interface SingleEvaluationModalProps {
   submission: EvaluationSubmission | null;
@@ -40,25 +40,9 @@ export const SingleEvaluationModal: React.FC<SingleEvaluationModalProps> = ({
   const gradeInfo = getGradeInfo(submission.grade, thresholds);
 
   const handleDownloadPdf = async () => {
-    if (!printRef.current) return;
     setIsExportingPdf(true);
     try {
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
-      const opt = {
-        margin: [10, 10, 10, 10] as [number, number, number, number],
-        filename: `ใบบันทึกคะแนน_${submission.evaluateeName.replace(/\s+/g, '_')}_โดย_${submission.evaluatorName.replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          logging: false,
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-      };
-      await html2pdf().set(opt).from(printRef.current).save();
+      await downloadSingleSubmissionPdf(submission, form, systemSettings, thresholds);
     } catch (err) {
       console.error(err);
       window.print();

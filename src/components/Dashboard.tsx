@@ -19,6 +19,7 @@ import {
   GraduationCap,
   Briefcase,
   FileDown,
+  Loader2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -63,6 +64,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
   const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
   const [aiExecutiveSummary, setAiExecutiveSummary] = useState<string | null>(null);
   const [selectedCandidateForDetails, setSelectedCandidateForDetails] = useState<AggregatedResult | null>(null);
+  const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
+
+  const handleDownloadTablePdf = async (item: AggregatedResult) => {
+    setDownloadingPdfId(item.evaluatee.id);
+    try {
+      await downloadIndividualPdf(item, systemSettings, gradeThresholds);
+    } catch (err) {
+      console.error('Table download PDF error:', err);
+    } finally {
+      setDownloadingPdfId(null);
+    }
+  };
 
   // Statistics calculation
   const totalEvaluatees = aggregatedResults.length;
@@ -827,11 +840,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
                               {item.submittedCommitteeCount > 0 && (
                                 <button
                                   type="button"
-                                  onClick={() => downloadIndividualPdf(item, systemSettings, gradeThresholds)}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-2xs"
+                                  disabled={downloadingPdfId === item.evaluatee.id}
+                                  onClick={() => handleDownloadTablePdf(item)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-xs font-bold transition cursor-pointer shadow-2xs"
                                   title="ดาวน์โหลด PDF รายบุคคล ตัวอักษรคมชัดไม่เพี้ยน"
                                 >
-                                  <FileDown className="w-3.5 h-3.5" />
+                                  {downloadingPdfId === item.evaluatee.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <FileDown className="w-3.5 h-3.5" />
+                                  )}
                                   <span>PDF</span>
                                 </button>
                               )}

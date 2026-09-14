@@ -46,7 +46,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
   const handleDownloadPdf = async () => {
     setIsExportingPdf(true);
     try {
-      await downloadIndividualPdf(result, systemSettings, thresholds, reportRef.current || undefined);
+      await downloadIndividualPdf(result, systemSettings, thresholds);
       setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 3500);
     } catch (error) {
