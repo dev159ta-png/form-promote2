@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { AggregatedResult, GradeThreshold } from '../types';
 import { useApp } from '../context/AppContext';
 import {
@@ -11,8 +11,16 @@ import {
   Building2,
   Calendar,
   X,
+  Loader2,
+  FileDown,
+  Sparkles,
 } from 'lucide-react';
 import { getGradeInfo } from '../utils/evaluationCalculator';
+import {
+  downloadIndividualPdf,
+  printIndividualReport,
+  getOfficialReportTitle,
+} from '../utils/pdfExport';
 
 interface EvaluationReportModalProps {
   result: AggregatedResult | null;
@@ -27,19 +35,38 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
 }) => {
   const { systemSettings } = useApp();
   const reportRef = useRef<HTMLDivElement | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   if (!result) return null;
 
   const gradeInfo = getGradeInfo(result.finalGrade, thresholds);
+  const officialTitle = getOfficialReportTitle(result.evaluatee.position);
+
+  const handleDownloadPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      await downloadIndividualPdf(result, systemSettings, thresholds, reportRef.current || undefined);
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3500);
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      // Fallback to print engine if needed
+      printIndividualReport(result, systemSettings, thresholds);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const handlePrint = () => {
-    window.print();
+    printIndividualReport(result, systemSettings, thresholds);
   };
 
   const handleDownloadDocx = () => {
     // Generate text document export formatted cleanly
     const content = `
 แบบรายงานสรุปผลการประเมินการปฏิบัติงาน (Official Evaluation Report)
+${officialTitle}
 ${systemSettings.evaluationRound} ประจำปีงบประมาณ ${systemSettings.academicYear}
 สถานศึกษา: ${systemSettings.schoolName} (${systemSettings.schoolAffiliation})
 
@@ -86,47 +113,85 @@ ${result.submissions
       <div className="bg-white rounded-2xl max-w-4xl w-full my-6 shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Top Modal Toolbar (Hidden in Print) */}
-        <div className="p-4 bg-slate-900 text-white flex items-center justify-between gap-3 print:hidden">
+        <div className="p-3.5 sm:p-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-400" />
-            <h3 className="font-bold text-sm sm:text-base">
-              แบบรายงานผลการประเมินการปฏิบัติงานรายบุคคล (Official Report)
-            </h3>
+            <FileText className="w-5 h-5 text-blue-400 shrink-0" />
+            <div>
+              <h3 className="font-bold text-xs sm:text-sm md:text-base">
+                แบบรายงานผลการประเมินการปฏิบัติงานรายบุคคล (Official Report)
+              </h3>
+              <p className="text-[11px] text-slate-400 truncate max-w-sm sm:max-w-md">
+                ผู้รับการประเมิน: <span className="text-white font-semibold">{result.evaluatee.name}</span> ({result.evaluatee.position})
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Primary Individual PDF Download Button */}
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isExportingPdf}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+              title="ดาวน์โหลดไฟล์ .PDF รายบุคคล ตัวอักษรคมชัดไม่เพี้ยน"
+            >
+              {isExportingPdf ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>กำลังสร้าง PDF...</span>
+                </>
+              ) : (
+                <>
+                  <FileDown className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>ดาวน์โหลด PDF รายบุคคล</span>
+                </>
+              )}
+            </button>
+
+            {/* Print / Save as PDF Button */}
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+              title="สั่งพิมพ์ A4 หรือเลือกบันทึกเป็น PDF ผ่านระบบเบราว์เซอร์"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>พิมพ์เอกสาร (Print / PDF)</span>
+              <span>พิมพ์เอกสาร A4</span>
             </button>
 
             <button
               type="button"
               onClick={handleDownloadDocx}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition cursor-pointer border border-white/20"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition cursor-pointer border border-white/20"
+              title="ดาวน์โหลดเป็นไฟล์เอกสาร Word (.DOC)"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>ดาวน์โหลด .DOC</span>
+              <span>.DOC</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
+        {/* Success Alert Banner */}
+        {downloadSuccess && (
+          <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 flex items-center gap-2 text-emerald-800 text-xs font-medium animate-in slide-in-from-top-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>ดาวน์โหลดเอกสาร PDF รายบุคคลเรียบร้อยแล้ว ตัวอักษรและสระภาษาไทยถูกต้องสมบูรณ์</span>
+          </div>
+        )}
+
         {/* Printable Official Form Body */}
         <div
           ref={reportRef}
-          className="p-6 sm:p-10 overflow-y-auto space-y-6 text-slate-900 font-sans leading-normal bg-white"
+          className="p-6 sm:p-10 overflow-y-auto space-y-6 text-slate-900 leading-normal bg-white font-sarabun"
+          style={{ fontFamily: "'Sarabun', 'TH Sarabun New', Tahoma, sans-serif" }}
         >
           {/* Official Document Header */}
           <div className="text-center space-y-2 border-b-2 border-slate-900 pb-5">
@@ -142,7 +207,7 @@ ${result.submissions
               )}
             </div>
             <h2 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
-              แบบสรุปผลการประเมินการปฏิบัติงานของลูกจ้างชั่วคราว
+              {officialTitle}
             </h2>
             <p className="text-xs sm:text-sm font-medium text-slate-600">
               {systemSettings.evaluationRound} ประจำปีงบประมาณ {systemSettings.academicYear}

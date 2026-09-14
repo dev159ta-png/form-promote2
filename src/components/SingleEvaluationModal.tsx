@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { EvaluationSubmission, GradeThreshold } from '../types';
 import { useApp } from '../context/AppContext';
 import {
@@ -13,8 +13,11 @@ import {
   Clock,
   Sparkles,
   Download,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { getGradeInfo } from '../utils/evaluationCalculator';
+import html2pdf from 'html2pdf.js';
 
 interface SingleEvaluationModalProps {
   submission: EvaluationSubmission | null;
@@ -29,11 +32,40 @@ export const SingleEvaluationModal: React.FC<SingleEvaluationModalProps> = ({
 }) => {
   const { systemSettings, formTemplates } = useApp();
   const printRef = useRef<HTMLDivElement | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   if (!submission) return null;
 
   const form = formTemplates.find((f) => f.id === submission.formId) || formTemplates[0];
   const gradeInfo = getGradeInfo(submission.grade, thresholds);
+
+  const handleDownloadPdf = async () => {
+    if (!printRef.current) return;
+    setIsExportingPdf(true);
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      const opt = {
+        margin: [10, 10, 10, 10] as [number, number, number, number],
+        filename: `ใบบันทึกคะแนน_${submission.evaluateeName.replace(/\s+/g, '_')}_โดย_${submission.evaluatorName.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false,
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+      };
+      await html2pdf().set(opt).from(printRef.current).save();
+    } catch (err) {
+      console.error(err);
+      window.print();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -56,14 +88,34 @@ export const SingleEvaluationModal: React.FC<SingleEvaluationModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isExportingPdf}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+              title="ดาวน์โหลดไฟล์ .PDF ตัวอักษรไม่เพี้ยน"
+            >
+              {isExportingPdf ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>กำลังสร้าง PDF...</span>
+                </>
+              ) : (
+                <>
+                  <FileDown className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>ดาวน์โหลด PDF</span>
+                </>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>พิมพ์ / PDF</span>
+              <span>พิมพ์</span>
             </button>
 
             <button
@@ -77,7 +129,11 @@ export const SingleEvaluationModal: React.FC<SingleEvaluationModalProps> = ({
         </div>
 
         {/* Modal Content Body */}
-        <div ref={printRef} className="p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 bg-white">
+        <div
+          ref={printRef}
+          className="p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 bg-white"
+          style={{ fontFamily: "'Sarabun', 'TH Sarabun New', Tahoma, sans-serif" }}
+        >
           {/* Header */}
           <div className="text-center space-y-1 pb-4 border-b border-slate-200">
             <h2 className="text-base sm:text-lg font-bold text-slate-900">

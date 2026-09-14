@@ -12,18 +12,22 @@ import {
   Award,
   Calendar,
   History,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { exportToCSV, getGradeInfo } from '../utils/evaluationCalculator';
 import { AggregatedResult } from '../types';
+import { downloadIndividualPdf } from '../utils/pdfExport';
 
 interface ReportsCenterViewProps {
   onOpenReport: (result: AggregatedResult) => void;
 }
 
 export const ReportsCenterView: React.FC<ReportsCenterViewProps> = ({ onOpenReport }) => {
-  const { aggregatedResults, auditLogs, gradeThresholds } = useApp();
+  const { aggregatedResults, auditLogs, gradeThresholds, systemSettings } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'reports' | 'audit'>('reports');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const filteredResults = aggregatedResults.filter(
     (r) =>
@@ -131,14 +135,44 @@ export const ReportsCenterView: React.FC<ReportsCenterViewProps> = ({ onOpenRepo
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setDownloadingId(item.evaluateeId);
+                        try {
+                          await downloadIndividualPdf(item, systemSettings, gradeThresholds);
+                        } catch (err) {
+                          console.error(err);
+                        } finally {
+                          setDownloadingId(null);
+                        }
+                      }}
+                      disabled={downloadingId === item.evaluateeId}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition cursor-pointer disabled:opacity-50"
+                      title="ดาวน์โหลดไฟล์ .PDF ของบุคคลนี้ทันที ตัวอักษรไม่เพี้ยน"
+                    >
+                      {downloadingId === item.evaluateeId ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>กำลังโหลด...</span>
+                        </>
+                      ) : (
+                        <>
+                          <FileDown className="w-3.5 h-3.5 text-emerald-100" />
+                          <span>ดาวน์โหลด PDF</span>
+                        </>
+                      )}
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => onOpenReport(item)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition cursor-pointer"
                     >
-                      <Printer className="w-4 h-4" />
-                      <span>เปิดดูแบบรายงานราชการ (Official PDF)</span>
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>เปิดดูแบบรายงาน (Official PDF)</span>
                     </button>
                   </div>
                 </div>
