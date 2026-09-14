@@ -30,10 +30,10 @@ function getReportCss(): string {
       background-color: #ffffff;
       color: #111827;
       width: 794px;
-      padding: 36px 44px;
+      padding: 22px 34px;
       margin: 0;
-      line-height: 1.45;
-      font-size: 13pt;
+      line-height: 1.35;
+      font-size: 12pt;
       letter-spacing: normal !important;
       -webkit-font-smoothing: antialiased;
     }
@@ -43,14 +43,14 @@ function getReportCss(): string {
     }
     .pes-header {
       text-align: center;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
       border-bottom: 2px solid #1e293b;
     }
     .pes-logo {
-      width: 65px;
-      height: 65px;
-      margin: 0 auto 6px;
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 4px;
     }
     .pes-logo img {
       width: 100%;
@@ -58,44 +58,44 @@ function getReportCss(): string {
       object-fit: contain;
     }
     .pes-title {
-      font-size: 15.5pt;
+      font-size: 14pt;
       font-weight: 700;
-      margin: 0 0 3px;
+      margin: 0 0 2px;
       color: #0f172a;
     }
     .pes-subtitle {
-      font-size: 12.5pt;
+      font-size: 11pt;
       color: #334155;
       margin: 0 0 2px;
     }
     .pes-school-info {
-      font-size: 10.5pt;
+      font-size: 10pt;
       color: #475569;
       white-space: nowrap;
     }
     .pes-section-title {
-      font-size: 12.5pt;
+      font-size: 11.5pt;
       font-weight: 700;
       background: #f1f5f9;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
       border-left: 4px solid #1e40af;
-      margin: 12px 0 6px;
+      margin: 8px 0 4px;
       color: #0f172a;
     }
     .pes-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .pes-table td {
-      padding: 3px 6px;
-      font-size: 12pt;
+      padding: 2px 4px;
+      font-size: 11pt;
       vertical-align: top;
     }
     .pes-label {
       color: #475569;
-      width: 24%;
+      width: 22%;
     }
     .pes-val {
       color: #0f172a;
@@ -103,58 +103,58 @@ function getReportCss(): string {
     }
     .pes-score-grid {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 6px;
     }
     .pes-score-box {
       flex: 1;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      padding: 8px 6px;
+      padding: 5px 4px;
       text-align: center;
       background: #f8fafc;
     }
     .pes-score-box-lbl {
-      font-size: 10.5pt;
+      font-size: 10pt;
       color: #64748b;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
     .pes-score-box-num {
-      font-size: 17pt;
+      font-size: 15pt;
       font-weight: 800;
       color: #0f172a;
     }
     .pes-badge {
       display: inline-block;
-      padding: 3px 12px;
-      border-radius: 16px;
+      padding: 2px 10px;
+      border-radius: 12px;
       font-weight: 700;
-      font-size: 12pt;
+      font-size: 11pt;
       background: #e0e7ff;
       color: #1e3a8a;
       border: 1px solid #bfdbfe;
     }
     .pes-thresholds {
-      font-size: 10pt;
+      font-size: 9pt;
       color: #475569;
       background: #f8fafc;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 4px 8px;
+      border-radius: 5px;
       border: 1px solid #e2e8f0;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .pes-threshold-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-top: 3px;
+      gap: 4px;
+      margin-top: 2px;
       font-weight: 500;
     }
     .pes-card {
       border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-bottom: 6px;
+      border-radius: 5px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
       background: #ffffff;
       page-break-inside: avoid;
     }
@@ -162,79 +162,79 @@ function getReportCss(): string {
       display: flex;
       justify-content: space-between;
       border-bottom: 1px dashed #cbd5e1;
-      padding-bottom: 3px;
-      margin-bottom: 3px;
-      font-size: 11.5pt;
+      padding-bottom: 2px;
+      margin-bottom: 2px;
+      font-size: 10.5pt;
     }
     .pes-card-score {
       font-weight: 700;
       color: #1e40af;
     }
     .pes-card-comments {
-      font-size: 10.5pt;
+      font-size: 9.5pt;
       color: #334155;
     }
     .pes-comment {
-      margin: 2px 0;
+      margin: 1px 0;
     }
     .pes-sigs-grid {
       display: flex;
       justify-content: space-around;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 6px;
       page-break-inside: avoid;
     }
     .pes-sig-box {
       flex: 1;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      padding: 8px 4px;
+      padding: 5px 3px;
       text-align: center;
       background: #fcfcfd;
     }
     .pes-sig-img-wrap {
-      height: 48px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .pes-sig-img {
-      max-height: 44px;
-      max-width: 120px;
+      max-height: 38px;
+      max-width: 110px;
       object-fit: contain;
     }
     .pes-sig-placeholder {
-      font-size: 9.5pt;
+      font-size: 9pt;
       color: #94a3b8;
       font-style: italic;
     }
     .pes-sig-line {
       border-top: 1px solid #94a3b8;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
       width: 80%;
       margin-left: auto;
       margin-right: auto;
     }
     .pes-sig-name {
       font-weight: 700;
-      font-size: 11pt;
+      font-size: 10.5pt;
       color: #0f172a;
     }
     .pes-sig-pos {
-      font-size: 9.5pt;
+      font-size: 9pt;
       color: #64748b;
     }
     .pes-sig-date {
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #94a3b8;
-      margin-top: 2px;
+      margin-top: 1px;
     }
     .pes-approval {
       display: flex;
       justify-content: space-around;
-      margin-top: 14px;
-      padding-top: 12px;
+      margin-top: 8px;
+      padding-top: 6px;
       border-top: 2px solid #cbd5e1;
       text-align: center;
       page-break-inside: avoid;
@@ -243,18 +243,18 @@ function getReportCss(): string {
       width: 46%;
     }
     .pes-approval-space {
-      height: 42px;
+      height: 32px;
       border-bottom: 1px dashed #94a3b8;
-      width: 200px;
-      margin: 0 auto 6px;
+      width: 180px;
+      margin: 0 auto 4px;
     }
     .pes-footer {
-      margin-top: 14px;
+      margin-top: 8px;
       text-align: center;
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: #94a3b8;
       border-top: 1px solid #e2e8f0;
-      padding-top: 4px;
+      padding-top: 3px;
     }
   `;
 }
@@ -396,14 +396,14 @@ function buildOfficialReportBody(
         <div class="pes-approval-box">
           <div style="font-weight: 700; margin-bottom: 6px;">ผู้อำนวยการสถานศึกษา / ผู้มีอำนาจสั่งจ้าง</div>
           <div class="pes-approval-space"></div>
-          <div style="font-weight: 600;">(นายปรัชญา สมณะช้างเผือก)</div>
-          <div style="font-size: 10.5pt; color: #475569;">ผู้อำนวยการโรงเรียนศึกษาพิเศษชัยนาท</div>
+          <div style="font-weight: 600;">( ${systemSettings.directorName || 'นายปรัชญา สมณะช้างเผือก'} )</div>
+          <div style="font-size: 10.5pt; color: #475569;">${systemSettings.directorPosition || 'ผู้อำนวยการโรงเรียนศึกษาพิเศษชัยนาท'}</div>
           <div style="font-size: 10pt; color: #64748b;">วันที่ ........ เดือน .................... พ.ศ. ........</div>
         </div>
       </div>
 
       <div class="pes-footer">
-        เอกสารนี้พิมพ์จากระบบประเมินผลการปฏิบัติงานบุคลากรออนไลน์ (PES) โรงเรียนศึกษาพิเศษชัยนาท เมื่อวันที่ ${new Date().toLocaleDateString('th-TH', {
+        เอกสารนี้พิมพ์จากระบบประเมินผลการปฏิบัติงานบุคลากรออนไลน์ (PES) ${systemSettings.schoolName || 'โรงเรียนศึกษาพิเศษชัยนาท'} เมื่อวันที่ ${new Date().toLocaleDateString('th-TH', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -534,7 +534,7 @@ async function renderHtmlToPdf(
       throw new Error('Canvas rendering produced an empty buffer');
     }
 
-    // 5. Convert to jsPDF with clean page slicing
+    // 5. Convert to jsPDF with smart content-aware page slicing (prevents cutting text or elements)
     const pdf = new jsPDF({
       unit: 'mm',
       format: 'a4',
@@ -545,26 +545,107 @@ async function renderHtmlToPdf(
     const pdfHeight = 297;
     const margin = 8; // 8mm margin
     const contentWidth = pdfWidth - margin * 2; // 194mm
-    const contentHeight = (canvas.height * contentWidth) / canvas.width;
-
     const pageAvailHeight = pdfHeight - margin * 2; // 281mm
     const pxPerMm = canvas.width / contentWidth;
-    const pageCanvasHeight = Math.floor(pageAvailHeight * pxPerMm);
+    const maxPageCanvasHeight = Math.floor(pageAvailHeight * pxPerMm);
 
-    const totalPages = Math.ceil(canvas.height / pageCanvasHeight);
+    // Get 2D context for pixel checking
+    const canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Collect DOM elements that must not be sliced across horizontally
+    const sandboxRect = sandbox.getBoundingClientRect();
+    const breakableElements = Array.from(
+      sandbox.querySelectorAll<HTMLElement>(
+        '.pes-header, .pes-section-title, .pes-table, .pes-table tr, .pes-score-grid, .pes-thresholds, .pes-card, .pes-sigs-grid, .pes-sig-box, .pes-approval, .pes-approval-box, .pes-footer, h1, h2, h3, h4, p, table, tr, td'
+      )
+    );
+
+    const intervals = breakableElements
+      .map((el) => {
+        const rect = el.getBoundingClientRect();
+        return {
+          top: Math.round((rect.top - sandboxRect.top) * 2),
+          bottom: Math.round((rect.bottom - sandboxRect.top) * 2),
+        };
+      })
+      .filter((inv) => inv.bottom > inv.top);
+
+    const slicePoints: number[] = [0];
+    let currentY = 0;
+
+    while (currentY < canvas.height) {
+      const idealBottom = currentY + maxPageCanvasHeight;
+
+      if (idealBottom >= canvas.height) {
+        slicePoints.push(canvas.height);
+        break;
+      }
+
+      // Check if any element is crossed by idealBottom
+      let safeCutY = idealBottom;
+      const crossing = intervals.filter(
+        (inv) => inv.top < idealBottom && inv.bottom > idealBottom
+      );
+
+      if (crossing.length > 0) {
+        // Break before the uppermost crossing element
+        const minCrossingTop = Math.min(...crossing.map((inv) => inv.top));
+        // Keep at least 25% of the page
+        if (minCrossingTop > currentY + maxPageCanvasHeight * 0.25) {
+          safeCutY = minCrossingTop - Math.round(4 * 2);
+        }
+      }
+
+      // Search for a horizontal row of white pixels near safeCutY to guarantee zero cut characters
+      if (canvasCtx) {
+        const scanStart = Math.min(safeCutY, canvas.height - 1);
+        const scanLimit = Math.max(currentY + Math.round(60 * 2), scanStart - Math.round(50 * 2));
+        let bestWhiteRow = -1;
+
+        for (let y = scanStart; y >= scanLimit; y -= 2) {
+          let isLineWhite = true;
+          const step = Math.floor(canvas.width / 24);
+          for (let x = Math.floor(step / 2); x < canvas.width; x += step) {
+            const p = canvasCtx.getImageData(x, y, 1, 1).data;
+            if (p[0] < 240 || p[1] < 240 || p[2] < 240) {
+              isLineWhite = false;
+              break;
+            }
+          }
+          if (isLineWhite) {
+            bestWhiteRow = y;
+            break;
+          }
+        }
+
+        if (bestWhiteRow > currentY + Math.round(50 * 2)) {
+          safeCutY = bestWhiteRow;
+        }
+      }
+
+      // Ensure positive progress
+      if (safeCutY <= currentY + Math.round(50 * 2)) {
+        safeCutY = idealBottom;
+      }
+
+      slicePoints.push(safeCutY);
+      currentY = safeCutY;
+    }
+
+    const totalPages = slicePoints.length - 1;
 
     for (let i = 0; i < totalPages; i++) {
       if (i > 0) {
         pdf.addPage();
       }
 
-      const sourceY = i * pageCanvasHeight;
-      const sliceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+      const sourceY = slicePoints[i];
+      const sliceHeight = slicePoints[i + 1] - sourceY;
+      const sliceHeightMm = (sliceHeight * contentWidth) / canvas.width;
 
-      // Dedicated slice canvas per page
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = pageCanvasHeight;
+      pageCanvas.height = sliceHeight;
       const ctx = pageCanvas.getContext('2d');
       if (ctx) {
         ctx.fillStyle = '#ffffff';
@@ -583,7 +664,7 @@ async function renderHtmlToPdf(
       }
 
       const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.98);
-      pdf.addImage(sliceImgData, 'JPEG', margin, margin, contentWidth, pageAvailHeight);
+      pdf.addImage(sliceImgData, 'JPEG', margin, margin, contentWidth, sliceHeightMm);
     }
 
     // 6. Download the PDF

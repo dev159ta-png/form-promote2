@@ -150,6 +150,8 @@ export interface SystemSettings {
   isDemoMode: boolean; // toggle demo mode on/off
   academicYear: string;
   evaluationRound: string;
+  directorName?: string;
+  directorPosition?: string;
 }
 
 export interface EvaluationSubmission {
