@@ -69,8 +69,9 @@ function getReportCss(): string {
       margin: 0 0 2px;
     }
     .pes-school-info {
-      font-size: 11.5pt;
+      font-size: 10.5pt;
       color: #475569;
+      white-space: nowrap;
     }
     .pes-section-title {
       font-size: 12.5pt;

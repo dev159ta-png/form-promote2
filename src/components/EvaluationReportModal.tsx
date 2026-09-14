@@ -212,7 +212,7 @@ ${result.submissions
             <p className="text-xs sm:text-sm font-medium text-slate-600">
               {systemSettings.evaluationRound} ประจำปีงบประมาณ {systemSettings.academicYear}
             </p>
-            <div className="text-xs text-slate-600 font-medium">
+            <div className="text-[11px] sm:text-xs text-slate-600 font-medium whitespace-nowrap text-center overflow-x-auto sm:overflow-x-visible">
               สถานศึกษา: {systemSettings.schoolName} ({systemSettings.schoolAffiliation})
             </div>
           </div>
