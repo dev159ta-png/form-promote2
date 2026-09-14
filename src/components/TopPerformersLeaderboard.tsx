@@ -223,7 +223,7 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              จัดอันดับผู้มีผลการปฏิบัติงานยอดเยี่ยมประจำรอบประเมิน แยกกลุ่มครูผู้ช่วย และ 12 สายสนับสนุน
+              จัดอันดับผู้มีผลการปฏิบัติงานยอดเยี่ยมประจำรอบประเมิน แยกกลุ่มครูผู้ช่วย, พนักงานราชการ ครูผู้สอน และจ้างเหมาบริการ 13 ตำแหน่ง
             </p>
           </div>
         </div>
@@ -254,17 +254,6 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('support')}
-            className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${
-              activeTab === 'support'
-                ? 'bg-white text-emerald-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            กลุ่ม 2: จ้างเหมาบริการ
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab('gov_teacher')}
             className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${
               activeTab === 'gov_teacher'
@@ -272,7 +261,18 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            กลุ่ม 3: พนักงานราชการ ครูผู้สอน
+            กลุ่ม 2: พนักงานราชการ ครูผู้สอน
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('support')}
+            className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${
+              activeTab === 'support'
+                ? 'bg-white text-emerald-700 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            กลุ่ม 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)
           </button>
         </div>
       </div>
@@ -365,88 +365,7 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
         )}
 
         {/* ========================================================= */}
-        {/* GROUP 2: จ้างเหมาบริการทุกตำแหน่ง                          */}
-        {/* ========================================================= */}
-        {(activeTab === 'all' || activeTab === 'support') && (
-          <div className="rounded-3xl bg-slate-50/70 border border-slate-200/90 p-5 sm:p-6 flex flex-col justify-between space-y-5">
-            {/* Group Title & Summary Stats */}
-            <div>
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                    <Briefcase className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm sm:text-base text-slate-900">
-                      กลุ่มที่ 2 : จ้างเหมาบริการทุกตำแหน่ง
-                    </h4>
-                    <p className="text-[11px] text-slate-500">
-                      12 สายงาน ({supportResults.length} คน)
-                    </p>
-                  </div>
-                </div>
-
-                <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  กลุ่มที่ 2
-                </span>
-              </div>
-
-              {/* Group Quick Stats Pill */}
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-white border border-slate-200/80 mb-5">
-                <div className="text-center border-r border-slate-100 pr-2">
-                  <span className="text-[10px] text-slate-500 block">คะแนนสูงสุด</span>
-                  <span className="text-sm font-extrabold text-emerald-700">
-                    {supportMaxScore.toFixed(2)}%
-                  </span>
-                </div>
-                <div className="text-center pl-2">
-                  <span className="text-[10px] text-slate-500 block">คะแนนเฉลี่ย</span>
-                  <span className="text-sm font-extrabold text-slate-800">
-                    {supportAvgScore.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Podium Display (Top 3) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                  <span>อันดับคะแนนสูงสุด</span>
-                  <span className="text-emerald-600 text-[11px]">
-                    Top {Math.min(3, supportResults.length)}
-                  </span>
-                </div>
-
-                {supportResults.length > 0 ? (
-                  <div className="space-y-2.5">
-                    {supportResults.slice(0, 3).map((res, idx) => {
-                      const scheme = idx === 0 ? 'gold' : idx === 1 ? 'silver' : 'bronze';
-                      return renderPodiumItem(res, idx + 1, scheme);
-                    })}
-                  </div>
-                ) : (
-                  <div className="p-6 text-center text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">
-                    ยังไม่มีข้อมูลผลการประเมิน
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Toggle View More Button */}
-            {supportResults.length > 3 && (
-              <button
-                type="button"
-                onClick={() => setShowAllSupport(!showAllSupport)}
-                className="w-full py-2 rounded-xl bg-white hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <span>{showAllSupport ? 'ย่อเหลือ Top 3' : `ดูทั้งหมด (${supportResults.length} คน)`}</span>
-                {showAllSupport ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* ========================================================= */}
-        {/* GROUP 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน            */}
+        {/* GROUP 2: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน            */}
         {/* ========================================================= */}
         {(activeTab === 'all' || activeTab === 'gov_teacher') && (
           <div className="rounded-3xl bg-slate-50/70 border border-slate-200/90 p-5 sm:p-6 flex flex-col justify-between space-y-5">
@@ -459,7 +378,7 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
                   </div>
                   <div>
                     <h4 className="font-bold text-sm sm:text-base text-slate-900">
-                      กลุ่มที่ 3 : พนักงานราชการ ครูผู้สอน
+                      กลุ่มที่ 2 : พนักงานราชการ ครูผู้สอน
                     </h4>
                     <p className="text-[11px] text-slate-500">
                       พนักงานราชการทั่วไป ({govTeacherResults.length} คน)
@@ -468,7 +387,7 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
                 </div>
 
                 <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                  กลุ่มที่ 3
+                  กลุ่มที่ 2
                 </span>
               </div>
 
@@ -521,6 +440,87 @@ export const TopPerformersLeaderboard: React.FC<TopPerformersLeaderboardProps> =
               >
                 <span>{showAllGov ? 'ย่อเหลือ Top 3' : `ดูทั้งหมด (${govTeacherResults.length} คน)`}</span>
                 {showAllGov ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* GROUP 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)               */}
+        {/* ========================================================= */}
+        {(activeTab === 'all' || activeTab === 'support') && (
+          <div className="rounded-3xl bg-slate-50/70 border border-slate-200/90 p-5 sm:p-6 flex flex-col justify-between space-y-5">
+            {/* Group Title & Summary Stats */}
+            <div>
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm sm:text-base text-slate-900">
+                      กลุ่มที่ 3 : จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      13 ตำแหน่ง ({supportResults.length} คน)
+                    </p>
+                  </div>
+                </div>
+
+                <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  กลุ่มที่ 3
+                </span>
+              </div>
+
+              {/* Group Quick Stats Pill */}
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-white border border-slate-200/80 mb-5">
+                <div className="text-center border-r border-slate-100 pr-2">
+                  <span className="text-[10px] text-slate-500 block">คะแนนสูงสุด</span>
+                  <span className="text-sm font-extrabold text-emerald-700">
+                    {supportMaxScore.toFixed(2)}%
+                  </span>
+                </div>
+                <div className="text-center pl-2">
+                  <span className="text-[10px] text-slate-500 block">คะแนนเฉลี่ย</span>
+                  <span className="text-sm font-extrabold text-slate-800">
+                    {supportAvgScore.toFixed(2)}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Podium Display (Top 3) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span>อันดับคะแนนสูงสุด</span>
+                  <span className="text-emerald-600 text-[11px]">
+                    Top {Math.min(3, supportResults.length)}
+                  </span>
+                </div>
+
+                {supportResults.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {supportResults.slice(0, 3).map((res, idx) => {
+                      const scheme = idx === 0 ? 'gold' : idx === 1 ? 'silver' : 'bronze';
+                      return renderPodiumItem(res, idx + 1, scheme);
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">
+                    ยังไม่มีข้อมูลผลการประเมิน
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Toggle View More Button */}
+            {supportResults.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAllSupport(!showAllSupport)}
+                className="w-full py-2 rounded-xl bg-white hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>{showAllSupport ? 'ย่อเหลือ Top 3' : `ดูทั้งหมด (${supportResults.length} คน)`}</span>
+                {showAllSupport ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
             )}
           </div>

@@ -117,11 +117,11 @@ export const CommitteeGroupManager: React.FC = () => {
       targetPositionGroups.find((g) => g.id === targetId || g.name === targetId) || {
         name:
           targetId === 'teacher_assistant'
-            ? 'กลุ่มที่ 1 : ตำแหน่ง ครูผู้ช่วย (ลูกจ้างชั่วคราว)'
-            : targetId === 'support_staff'
-            ? 'กลุ่มที่ 2 : จ้างเหมาบริการทุกตำแหน่ง'
+            ? 'กลุ่มที่ 1 : ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย'
             : targetId === 'government_employee_teacher'
-            ? 'กลุ่มที่ 3 : พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน'
+            ? 'กลุ่มที่ 2 : พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน'
+            : targetId === 'support_staff'
+            ? 'กลุ่มที่ 3 : จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)'
             : targetId,
         code: targetId,
         color: 'blue',

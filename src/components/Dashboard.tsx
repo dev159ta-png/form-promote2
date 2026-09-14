@@ -542,30 +542,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
 
               <button
                 type="button"
-                onClick={() => setQuickFilter('support')}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  quickFilter === 'support'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
-                }`}
-                title="กลุ่มที่ 2 : จ้างเหมาบริการทุกตำแหน่ง"
-              >
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>กลุ่ม 2: จ้างเหมาบริการ ({supportCount})</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setQuickFilter('gov_teacher')}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                   quickFilter === 'gov_teacher'
                     ? 'bg-purple-600 text-white shadow-xs'
                     : 'bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-200'
                 }`}
-                title="กลุ่มที่ 3 : พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน"
+                title="กลุ่มที่ 2 : พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>กลุ่ม 3: พนักงานราชการ ครูผู้สอน ({govTeacherCount})</span>
+                <span>กลุ่ม 2: พนักงานราชการ ครูผู้สอน ({govTeacherCount})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickFilter('support')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  quickFilter === 'support'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                }`}
+                title="กลุ่มที่ 3 : จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)"
+              >
+                <Briefcase className="w-3.5 h-3.5" />
+                <span>กลุ่ม 3: จ้างเหมาบริการ ({supportCount})</span>
               </button>
             </div>
 

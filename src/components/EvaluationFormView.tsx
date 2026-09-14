@@ -473,20 +473,6 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
               <button
                 type="button"
                 onClick={() => {
-                  const supportForm = formTemplates.find((t) => t.group === 'support_staff');
-                  if (supportForm) setSelectedFormId(supportForm.id);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  currentForm.group === 'support_staff'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                กลุ่มที่ 2: จ้างเหมาบริการ
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   const govForm = formTemplates.find((t) => t.group === 'government_employee_teacher' || t.id === 'form_government_employee_teacher');
                   if (govForm) setSelectedFormId(govForm.id);
                 }}
@@ -496,7 +482,21 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                กลุ่มที่ 3: พนักงานราชการ (ครูผู้สอน)
+                กลุ่มที่ 2: พนักงานราชการ (ครูผู้สอน)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const supportForm = formTemplates.find((t) => t.group === 'support_staff');
+                  if (supportForm) setSelectedFormId(supportForm.id);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  currentForm.group === 'support_staff'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)
               </button>
             </div>
           </div>
@@ -506,14 +506,14 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              1. เลือกแบบประเมินตำแหน่งงาน (14 ตำแหน่ง / 3 กลุ่มหลัก):
+              1. เลือกแบบประเมินตำแหน่งงาน (15 ตำแหน่ง / 3 กลุ่มหลัก):
             </label>
             <select
               value={selectedFormId}
               onChange={(e) => setSelectedFormId(e.target.value)}
               className="w-full py-2.5 px-3 rounded-xl border border-slate-300 bg-white font-medium text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-              <optgroup label="กลุ่มที่ 1 : ตำแหน่ง ครูผู้ช่วย (ลูกจ้างชั่วคราว)">
+              <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">
                 {formTemplates
                   .filter((t) => t.group === 'teacher_assistant')
                   .map((t) => (
@@ -522,18 +522,18 @@ export const EvaluationFormView: React.FC<EvaluationFormViewProps> = ({ onEvalua
                     </option>
                   ))}
               </optgroup>
-              <optgroup label="กลุ่มที่ 2 : จ้างเหมาบริการทุกตำแหน่ง (12 ตำแหน่ง)">
+              <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
                 {formTemplates
-                  .filter((t) => t.group === 'support_staff')
+                  .filter((t) => t.group === 'government_employee_teacher')
                   .map((t) => (
                     <option key={t.id} value={t.id}>
                       [{t.code}] {t.title}
                     </option>
                   ))}
               </optgroup>
-              <optgroup label="กลุ่มที่ 3 : พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน">
+              <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)">
                 {formTemplates
-                  .filter((t) => t.group === 'government_employee_teacher')
+                  .filter((t) => t.group === 'support_staff')
                   .map((t) => (
                     <option key={t.id} value={t.id}>
                       [{t.code}] {t.title}

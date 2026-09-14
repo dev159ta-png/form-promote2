@@ -83,12 +83,12 @@ export const RubricsCatalogView: React.FC = () => {
             </div>
           </div>
 
-          {/* Group 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน */}
+          {/* Group 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน */}
           {govTeacherForms.length > 0 && (
             <div className="bg-white rounded-2xl border border-purple-200 p-4 shadow-xs">
               <h3 className="text-xs font-bold uppercase tracking-wider text-purple-700 mb-2 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-purple-600" />
-                <span>กลุ่มที่ 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน</span>
+                <span>กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน</span>
               </h3>
               <div className="space-y-1.5">
                 {govTeacherForms.map((t) => {
@@ -115,11 +115,11 @@ export const RubricsCatalogView: React.FC = () => {
             </div>
           )}
 
-          {/* Group 2 */}
+          {/* Group 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง) */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
             <h3 className="text-xs font-bold uppercase tracking-wider text-blue-700 mb-2 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-blue-600" />
-              <span>กลุ่มที่ 2: ลูกจ้างชั่วคราว สายสนับสนุน/ปฏิบัติงาน (12 ตำแหน่ง)</span>
+              <span>กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)</span>
             </h3>
             <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
               {supportForms.map((t) => {

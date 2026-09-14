@@ -10,13 +10,33 @@ import {
   Server,
   Cloud,
   ShieldAlert,
+  HardDrive,
+  CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const DatabaseSchemaModal: React.FC = () => {
-  const { users, committeeGroups, submissions, formTemplates, auditLogs } = useApp();
+  const { users, committeeGroups, targetPositionGroups, submissions, formTemplates, auditLogs } = useApp();
   const [copiedType, setCopiedType] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'er' | 'firestore' | 'sql' | 'json'>('er');
+
+  // Calculate live database storage and Firestore quotas
+  const liveDbData = {
+    users,
+    committeeGroups,
+    targetPositionGroups,
+    formTemplates,
+    submissions,
+    auditLogs,
+  };
+  const jsonString = JSON.stringify(liveDbData);
+  const approximateBytes = new Blob([jsonString]).size;
+  const approximateKB = (approximateBytes / 1024).toFixed(1);
+  const approximateMB = (approximateBytes / (1024 * 1024)).toFixed(3);
+  const totalQuotaMB = 1024; // 1 GiB free Firestore Spark Plan
+  const remainingMB = (totalQuotaMB - parseFloat(approximateMB)).toFixed(2);
+  const usedPercent = Math.max(0.01, (parseFloat(approximateMB) / totalQuotaMB) * 100).toFixed(2);
 
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -199,6 +219,75 @@ CREATE INDEX idx_eval_sub_grade ON evaluation_submissions(grade);
           <Download className="w-4 h-4 text-emerald-400" />
           <span>ดาวน์โหลด JSON Backup</span>
         </button>
+      </div>
+
+      {/* Storage Capacity & Quota Status Panel */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-5 sm:p-6 border border-slate-800 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <HardDrive className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-white">
+                  สถานะพื้นที่จัดเก็บฐานข้อมูล (Database Storage &amp; Quota)
+                </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  Firebase Spark (Free Tier)
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                ฐานข้อมูล Google Cloud Firestore (โปรเจกต์: form-promote2) โควตาฟรี 1,024 MB (1.00 GB)
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-xs text-slate-400 block">พื้นที่ว่างคงเหลือ</span>
+            <span className="text-base sm:text-lg font-extrabold text-emerald-400">
+              {remainingMB} MB <span className="text-xs font-normal text-slate-300">(เหลือ &gt; 99.9%)</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Storage Bar */}
+        <div>
+          <div className="flex justify-between text-xs text-slate-300 mb-1.5 font-medium">
+            <span>ใช้ไปแล้ว: <strong className="text-white">{approximateKB} KB</strong> ({approximateMB} MB)</span>
+            <span>ความจุทั้งหมด: <strong className="text-white">1,024 MB (1.00 GB)</strong></span>
+          </div>
+          <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(1, parseFloat(usedPercent))}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Metric Badges */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 text-center">
+            <span className="text-[10px] text-slate-400 block">ผู้ใช้งาน (Users)</span>
+            <span className="text-sm font-bold text-blue-400">{users.length} รายการ</span>
+          </div>
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 text-center">
+            <span className="text-[10px] text-slate-400 block">กลุ่มกรรมการ</span>
+            <span className="text-sm font-bold text-purple-400">{committeeGroups.length} กลุ่ม</span>
+          </div>
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 text-center">
+            <span className="text-[10px] text-slate-400 block">แบบฟอร์มประเมิน</span>
+            <span className="text-sm font-bold text-amber-400">{formTemplates.length} ฟอร์ม</span>
+          </div>
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 text-center">
+            <span className="text-[10px] text-slate-400 block">ผลการประเมิน (Submissions)</span>
+            <span className="text-sm font-bold text-emerald-400">{submissions.length} รายการ</span>
+          </div>
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2.5 text-center col-span-2 sm:col-span-1">
+            <span className="text-[10px] text-slate-400 block">ประวัติการบันทึก (Audit Logs)</span>
+            <span className="text-sm font-bold text-slate-300">{auditLogs.length} บันทึก</span>
+          </div>
+        </div>
       </div>
 
       {/* Tabs */}

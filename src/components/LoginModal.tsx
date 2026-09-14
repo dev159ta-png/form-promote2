@@ -352,10 +352,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
                       <Briefcase className="w-4 h-4 text-amber-700" />
-                      <span>กลุ่มที่ 2: สายสนับสนุน (จ้างเหมาบริการ 12 ตำแหน่ง)</span>
+                      <span>กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)</span>
                     </div>
                     <span className="text-[11px] text-amber-800 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
-                      ครบทั้ง 12 สายงาน
+                      ครบทั้ง 13 สายงาน
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">

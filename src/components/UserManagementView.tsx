@@ -337,6 +337,11 @@ export const UserManagementView: React.FC = () => {
         ? 'teacher_assistant'
         : 'support_staff');
 
+    let initialPosition = user.position;
+    if (initialPosition && initialPosition.startsWith('ลูกจ้างชั่วคราว ตำแหน่ง') && !initialPosition.includes('ครูผู้ช่วย')) {
+      initialPosition = initialPosition.replace('ลูกจ้างชั่วคราว ตำแหน่ง', 'จ้างเหมาบริการ ตำแหน่ง');
+    }
+
     setEditingUser(user);
     setFormData({
       name: user.name,
@@ -344,7 +349,7 @@ export const UserManagementView: React.FC = () => {
       password: user.password || 'password123',
       role: user.role,
       positionGroup: resolvedGroup,
-      position: user.position,
+      position: initialPosition,
       department: user.department,
       email: user.email || '',
       phone: user.phone || '',
@@ -564,7 +569,7 @@ export const UserManagementView: React.FC = () => {
             ระบบจัดการผู้ใช้งานและสิทธิ์ (User & Access Control)
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            จัดการรายชื่อ ชื่อผู้ใช้ รหัสผ่าน บทบาท และตำแหน่งงาน (ครูผู้ช่วย & สายสนับสนุน 12 สายงาน)
+            จัดการรายชื่อ ชื่อผู้ใช้ รหัสผ่าน บทบาท และตำแหน่งงาน (ครูผู้ช่วย, พนักงานราชการ ครูผู้สอน และจ้างเหมาบริการ 13 ตำแหน่ง)
           </p>
         </div>
 
@@ -1016,7 +1021,7 @@ export const UserManagementView: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, formTemplateId: e.target.value })}
                     className="w-full px-3 py-2.5 text-xs sm:text-sm border border-indigo-300 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white font-medium text-slate-900"
                   >
-                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่ง ครูผู้ช่วย">
+                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">
                       {formTemplates
                         .filter((t) => t.group === 'teacher_assistant')
                         .map((t) => (
@@ -1025,18 +1030,18 @@ export const UserManagementView: React.FC = () => {
                           </option>
                         ))}
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 2: ลูกจ้างชั่วคราว สายสนับสนุน/ปฏิบัติงาน (12 ตำแหน่ง)">
+                    <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
                       {formTemplates
-                        .filter((t) => t.group === 'support_staff')
+                        .filter((t) => t.group === 'government_employee_teacher')
                         .map((t) => (
                           <option key={t.id} value={t.id}>
                             [{t.code}] {t.title} ({t.totalMaxScore} คะแนน)
                           </option>
                         ))}
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน">
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)">
                       {formTemplates
-                        .filter((t) => t.group === 'government_employee_teacher')
+                        .filter((t) => t.group === 'support_staff')
                         .map((t) => (
                           <option key={t.id} value={t.id}>
                             [{t.code}] {t.title} ({t.totalMaxScore} คะแนน)
@@ -1105,7 +1110,7 @@ export const UserManagementView: React.FC = () => {
                     <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
                       <option value="พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน</option>
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ / ลูกจ้างชั่วคราว สายสนับสนุน (13 ตำแหน่ง)">
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)">
                       {STANDARD_POSITIONS_13.filter((p) => p.group === 'support_staff').map((pos) => (
                         <option key={pos.code} value={pos.title}>
                           {pos.title}
@@ -1331,7 +1336,7 @@ export const UserManagementView: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, formTemplateId: e.target.value })}
                     className="w-full px-3 py-2.5 text-xs sm:text-sm border border-indigo-300 rounded-xl focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white font-semibold text-slate-900 shadow-2xs"
                   >
-                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่ง ครูผู้ช่วย">
+                    <optgroup label="กลุ่มที่ 1: ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย">
                       {formTemplates
                         .filter((t) => t.group === 'teacher_assistant')
                         .map((t) => (
@@ -1340,18 +1345,18 @@ export const UserManagementView: React.FC = () => {
                           </option>
                         ))}
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 2: ลูกจ้างชั่วคราว สายสนับสนุน/ปฏิบัติงาน (12 ตำแหน่ง)">
+                    <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
                       {formTemplates
-                        .filter((t) => t.group === 'support_staff')
+                        .filter((t) => t.group === 'government_employee_teacher')
                         .map((t) => (
                           <option key={t.id} value={t.id}>
                             [{t.code}] {t.title} ({t.totalMaxScore} คะแนน)
                           </option>
                         ))}
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน">
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)">
                       {formTemplates
-                        .filter((t) => t.group === 'government_employee_teacher')
+                        .filter((t) => t.group === 'support_staff')
                         .map((t) => (
                           <option key={t.id} value={t.id}>
                             [{t.code}] {t.title} ({t.totalMaxScore} คะแนน)
@@ -1425,7 +1430,7 @@ export const UserManagementView: React.FC = () => {
                     <optgroup label="กลุ่มที่ 2: พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">
                       <option value="พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน">พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน</option>
                     </optgroup>
-                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ / ลูกจ้างชั่วคราว สายสนับสนุน (13 ตำแหน่ง)">
+                    <optgroup label="กลุ่มที่ 3: จ้างเหมาบริการ ตำแหน่ง (13 ตำแหน่ง)">
                       {STANDARD_POSITIONS_13.filter((p) => p.group === 'support_staff').map((pos) => (
                         <option key={pos.code} value={pos.title}>
                           {pos.title}
