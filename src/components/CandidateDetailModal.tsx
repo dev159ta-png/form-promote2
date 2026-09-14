@@ -22,8 +22,11 @@ import {
   Edit3,
   Trash2,
   Settings,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { getGradeInfo } from '../utils/evaluationCalculator';
+import { downloadIndividualPdf } from '../utils/pdfExport';
 import { SingleEvaluationModal } from './SingleEvaluationModal';
 import { AdminEditSubmissionModal } from './AdminEditSubmissionModal';
 
@@ -45,8 +48,21 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
   const { users, committeeGroups, currentUser, systemSettings } = useApp();
   const [selectedSubmission, setSelectedSubmission] = useState<EvaluationSubmission | null>(null);
   const [adminEditingSubmission, setAdminEditingSubmission] = useState<EvaluationSubmission | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   if (!item) return null;
+
+  const handleDownloadPdf = async () => {
+    setIsDownloadingPdf(true);
+    try {
+      await downloadIndividualPdf(item, systemSettings, gradeThresholds);
+    } catch (err) {
+      console.error('Download PDF error:', err);
+      onOpenSummaryReport(item);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const { evaluatee, submissions, gradeThresholds: itemThresholds } = item;
   const gradeInfo = getGradeInfo(item.finalGrade, gradeThresholds);
@@ -179,15 +195,36 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Action Button: Print Summary (Image 2) */}
-              <div className="mt-4 pt-1 flex justify-center">
+              {/* Action Buttons: Download PDF & Print Summary */}
+              <div className="mt-4 pt-1 flex flex-wrap items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-xl shadow-md transition cursor-pointer"
+                  title="ดาวน์โหลดไฟล์ .PDF ผลการประเมินรายบุคคลทันที ตัวอักษรคมชัดไม่เพี้ยน"
+                >
+                  {isDownloadingPdf ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>กำลังสร้าง PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileDown className="w-4 h-4 text-emerald-100" />
+                      <span>ดาวน์โหลด PDF รายบุคคล</span>
+                    </>
+                  )}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => onOpenSummaryReport(item)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-xl shadow-md transition cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-xl shadow-md transition cursor-pointer"
+                  title="เปิดดูแบบรายงานสรุปทางการ (Official Gov Report)"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>พิมพ์สรุปคะแนนคณะกรรมการ</span>
+                  <span>เปิดดูแบบรายงานราชการ (Official PDF)</span>
                 </button>
               </div>
             </div>

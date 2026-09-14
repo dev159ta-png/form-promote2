@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   GraduationCap,
   Calendar,
@@ -16,10 +16,13 @@ import {
   ArrowRight,
   ChevronRight,
   Edit3,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { AggregatedResult, GradeThreshold, User } from '../types';
 import { getGradeInfo } from '../utils/evaluationCalculator';
 import { useApp } from '../context/AppContext';
+import { downloadIndividualPdf } from '../utils/pdfExport';
 
 interface EvaluateeCardProps {
   item: AggregatedResult;
@@ -46,7 +49,21 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
   onOpenReport,
   onOpenDetails,
 }) => {
-  const { users, committeeGroups } = useApp();
+  const { users, committeeGroups, systemSettings } = useApp();
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsDownloadingPdf(true);
+    try {
+      await downloadIndividualPdf(item, systemSettings, gradeThresholds);
+    } catch (err) {
+      console.error('Download PDF error:', err);
+      onOpenReport(item);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   const {
     evaluatee,
     formTitle,
@@ -319,28 +336,49 @@ export const EvaluateeCard: React.FC<EvaluateeCardProps> = ({
 
       {/* 5. CARD FOOTER ACTION BUTTONS (Image 1) */}
       <div className="border-t border-slate-100 p-3 sm:px-4 bg-slate-50/60 flex flex-wrap items-center justify-between gap-2">
-        {/* Left Side: Detail & Print Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Button 1: พิมพ์สรุปคะแนน (Green button with Print icon) */}
+        {/* Left Side: Detail & Print & PDF Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          {/* Button 1: ดาวน์โหลด PDF รายบุคคล */}
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={isDownloadingPdf}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+            title="ดาวน์โหลดไฟล์ .PDF ของบุคคลนี้ทันที ตัวอักษรไม่เพี้ยน"
+          >
+            {isDownloadingPdf ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>โหลด PDF...</span>
+              </>
+            ) : (
+              <>
+                <FileDown className="w-3.5 h-3.5 text-emerald-100" />
+                <span>ดาวน์โหลด PDF</span>
+              </>
+            )}
+          </button>
+
+          {/* Button 2: พิมพ์แบบรายงานราชการ (Official Gov Report) */}
           <button
             type="button"
             onClick={() => onOpenReport(item)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
-            title="พิมพ์แบบสรุปผลการประเมินทางการ"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
+            title="เปิดดูและพิมพ์แบบสรุปรายงานผลทางการ"
           >
-            <Printer className="w-3.5 h-3.5" />
-            <span>พิมพ์สรุปคะแนน</span>
+            <Printer className="w-3.5 h-3.5 text-slate-600" />
+            <span>แบบรายงาน</span>
           </button>
 
-          {/* Button 2: รายละเอียดแผน (Outline button with info icon) */}
+          {/* Button 3: รายละเอียดแผน (Outline button with info icon) */}
           <button
             type="button"
             onClick={() => onOpenDetails && onOpenDetails(item)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold shadow-2xs transition cursor-pointer"
             title="ดูรายละเอียดแผนและรายชื่อคณะกรรมการทั้งหมด"
           >
             <Info className="w-3.5 h-3.5 text-slate-500" />
-            <span>รายละเอียดแผน</span>
+            <span>รายละเอียด</span>
           </button>
         </div>
 

@@ -18,6 +18,7 @@ import {
   UserCheck,
   GraduationCap,
   Briefcase,
+  FileDown,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -32,6 +33,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { exportToCSV, getGradeInfo } from '../utils/evaluationCalculator';
+import { downloadIndividualPdf } from '../utils/pdfExport';
 import { AggregatedResult } from '../types';
 import { TopPerformersLeaderboard } from './TopPerformersLeaderboard';
 import { EvaluateeCard } from './EvaluateeCard';
@@ -820,6 +822,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
                                 <span>{hasUserEvaluated ? 'แก้ไขคะแนน' : 'ประเมิน'}</span>
                                 <ArrowRight className="w-3 h-3" />
                               </button>
+
+                              {/* Direct Download PDF */}
+                              {item.submittedCommitteeCount > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => downloadIndividualPdf(item, systemSettings, gradeThresholds)}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-2xs"
+                                  title="ดาวน์โหลด PDF รายบุคคล ตัวอักษรคมชัดไม่เพี้ยน"
+                                >
+                                  <FileDown className="w-3.5 h-3.5" />
+                                  <span>PDF</span>
+                                </button>
+                              )}
 
                               {/* View Official Report Modal */}
                               {item.submittedCommitteeCount > 0 && (

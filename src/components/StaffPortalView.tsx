@@ -16,17 +16,21 @@ import {
   Clock,
   MessageSquare,
   Camera,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { AggregatedResult } from '../types';
 import { CommitteeProfileModal } from './CommitteeProfileModal';
+import { downloadIndividualPdf } from '../utils/pdfExport';
 
 interface StaffPortalViewProps {
   onOpenReport: (result: AggregatedResult) => void;
 }
 
 export const StaffPortalView: React.FC<StaffPortalViewProps> = ({ onOpenReport }) => {
-  const { currentUser, aggregatedResults, submissions, committeeGroups } = useApp();
+  const { currentUser, aggregatedResults, submissions, committeeGroups, systemSettings } = useApp();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // Find result for current user
   const myResult = aggregatedResults.find((r) => r.evaluatee.id === currentUser.id);
@@ -35,6 +39,19 @@ export const StaffPortalView: React.FC<StaffPortalViewProps> = ({ onOpenReport }
 
   const totalEvaluatorsCount = myGroup?.evaluatorIds.length || 3;
   const isCompleted = mySubmissions.length >= totalEvaluatorsCount;
+
+  const handleDownloadPdf = async () => {
+    if (!myResult) return;
+    setIsDownloadingPdf(true);
+    try {
+      await downloadIndividualPdf(myResult, systemSettings);
+    } catch (err) {
+      console.error(err);
+      onOpenReport(myResult);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
@@ -87,16 +104,39 @@ export const StaffPortalView: React.FC<StaffPortalViewProps> = ({ onOpenReport }
             </div>
           </div>
 
-          {/* Quick Print Official Report Button */}
+          {/* Quick PDF & Print Official Report Buttons */}
           {myResult && (
-            <button
-              type="button"
-              onClick={() => onOpenReport(myResult)}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white text-slate-900 hover:bg-blue-50 font-bold text-xs sm:text-sm shadow-lg hover:shadow-xl transition cursor-pointer shrink-0"
-            >
-              <Printer className="w-4 h-4 text-blue-700" />
-              <span>พิมพ์แบบสรุปผลการประเมิน (ก.พ.ร.)</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-lg transition cursor-pointer"
+                title="ดาวน์โหลดแบบสรุปผลการประเมินเป็นไฟล์ .PDF ทันที"
+              >
+                {isDownloadingPdf ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>กำลังสร้าง PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileDown className="w-4 h-4 text-emerald-100" />
+                    <span>ดาวน์โหลด PDF รายบุคคล</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onOpenReport(myResult)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/20 hover:bg-white/30 text-white border border-white/30 font-bold text-xs sm:text-sm shadow-md transition cursor-pointer"
+                title="เปิดดูรายงานและพิมพ์เอกสาร A4"
+              >
+                <Printer className="w-4 h-4" />
+                <span>พิมพ์แบบสรุป</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
