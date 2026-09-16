@@ -69,87 +69,91 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
   for (const raw of rawUsers) {
     let u = { ...raw };
 
-    // 1. Identify and fix orawan (EV-101 / evaluator_1)
-    if (
-      u.id === 'evaluator_1' ||
-      u.username === 'orawan' ||
-      u.employeeCode === 'EV-101' ||
-      (u.name.includes('อรวรรณ') && u.role === 'admin')
-    ) {
-      if (
-        u.id !== 'evaluator_1' ||
-        u.role !== 'evaluator' ||
-        u.name !== 'นางสาวอรวรรณ พงษ์ศิริ' ||
-        u.username !== 'orawan' ||
-        u.employeeCode !== 'EV-101' ||
-        !u.position.includes('รองผู้อำนวยการ')
-      ) {
+    // 1. Ensure evaluator_1 (Orawan) preserves user edits, only setting role and default fields if completely missing
+    if (u.id === 'evaluator_1' || u.username === 'orawan' || u.employeeCode === 'EV-101') {
+      if (u.id !== 'evaluator_1') {
+        u.id = 'evaluator_1';
         hasChanged = true;
       }
-      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['evaluator_1'];
-      u = {
-        ...u,
-        id: 'evaluator_1',
-        name: 'นางสาวอรวรรณ พงษ์ศิริ',
-        username: 'orawan',
-        role: 'evaluator',
-        position: 'รองผู้อำนวยการสถานศึกษา (ประธานกรรมการ ชุดที่ 1)',
-        department: 'ฝ่ายบริหารงานวิชาการและบุคคล',
-        groupId: 'group_1',
-        employeeCode: 'EV-101',
-        email: u.email || 'orawan.p@chainat-special.ac.th',
-        phone: u.phone || '081-987-6543',
-        avatarUrl: existingAvatar,
-        avatar: existingAvatar,
-      };
-    }
-
-    // 2. Identify and fix rannaphat (EV-302 / user_admin_1)
-    else if (
-      u.id === 'user_admin_1' ||
-      u.username === 'rannaphat' ||
-      u.employeeCode === 'EV-302' ||
-      (u.name.includes('รัณย์ณภัทร') && u.role === 'admin')
-    ) {
-      if (
-        u.id !== 'user_admin_1' ||
-        u.role !== 'admin' ||
-        u.name !== 'นางสาวรัณย์ณภัทร มากุญชร' ||
-        u.username !== 'rannaphat' ||
-        u.employeeCode !== 'EV-302'
-      ) {
+      if (u.role !== 'evaluator') {
+        u.role = 'evaluator';
         hasChanged = true;
       }
-      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['user_admin_1'];
-      u = {
-        ...u,
-        id: 'user_admin_1',
-        name: 'นางสาวรัณย์ณภัทร มากุญชร',
-        username: 'rannaphat',
-        role: 'admin',
-        position: 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)',
-        department: 'กลุ่มงานทะเบียนและประเมินผล',
-        employeeCode: 'EV-302',
-        email: u.email || 'rannaphat.m@chainat-special.ac.th',
-        phone: u.phone || '087-321-0987',
-        avatarUrl: existingAvatar,
-        avatar: existingAvatar,
-      };
+      if (!u.name) {
+        u.name = 'นางสาวอรวรรณ พงษ์ศิริ';
+        hasChanged = true;
+      }
+      if (!u.username) {
+        u.username = 'orawan';
+        hasChanged = true;
+      }
+      if (!u.position) {
+        u.position = 'รองผู้อำนวยการสถานศึกษา (ประธานกรรมการ ชุดที่ 1)';
+        hasChanged = true;
+      }
+      if (!u.department) {
+        u.department = 'ฝ่ายบริหารงานวิชาการและบุคคล';
+        hasChanged = true;
+      }
+      if (!u.groupId) {
+        u.groupId = 'group_1';
+        hasChanged = true;
+      }
+      if (!u.employeeCode) {
+        u.employeeCode = 'EV-101';
+        hasChanged = true;
+      }
+      if (!u.email) u.email = 'orawan.p@chainat-special.ac.th';
+      if (!u.phone) u.phone = '081-987-6543';
     }
 
-    // 3. Set default official photo only if user has no avatar set
-    if (OFFICIAL_AVATARS[u.id] && !u.avatarUrl && !u.avatar) {
+    // 2. Ensure user_admin_1 (Rannaphat) preserves user edits, only setting role and default fields if completely missing
+    else if (u.id === 'user_admin_1' || u.username === 'rannaphat' || u.employeeCode === 'EV-302') {
+      if (u.id !== 'user_admin_1') {
+        u.id = 'user_admin_1';
+        hasChanged = true;
+      }
+      if (u.role !== 'admin') {
+        u.role = 'admin';
+        hasChanged = true;
+      }
+      if (!u.name) {
+        u.name = 'นางสาวรัณย์ณภัทร มากุญชร';
+        hasChanged = true;
+      }
+      if (!u.username) {
+        u.username = 'rannaphat';
+        hasChanged = true;
+      }
+      if (!u.position) {
+        u.position = 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)';
+        hasChanged = true;
+      }
+      if (!u.department) {
+        u.department = 'กลุ่มงานทะเบียนและประเมินผล';
+        hasChanged = true;
+      }
+      if (!u.employeeCode) {
+        u.employeeCode = 'EV-302';
+        hasChanged = true;
+      }
+      if (!u.email) u.email = 'rannaphat.m@chainat-special.ac.th';
+      if (!u.phone) u.phone = '087-321-0987';
+    }
+
+    // 3. Set default official photo ONLY if user has NEVER set an avatar (undefined, not empty string)
+    if (OFFICIAL_AVATARS[u.id] && u.avatarUrl === undefined && u.avatar === undefined) {
       u.avatarUrl = OFFICIAL_AVATARS[u.id];
       u.avatar = OFFICIAL_AVATARS[u.id];
       hasChanged = true;
     }
 
-    // 4. Normalize avatar and avatarUrl for all users
-    if (u.avatar && !u.avatarUrl) {
+    // 4. Normalize avatar and avatarUrl so both match
+    if (u.avatar !== undefined && u.avatarUrl === undefined) {
       u.avatarUrl = u.avatar;
       hasChanged = true;
     }
-    if (u.avatarUrl && !u.avatar) {
+    if (u.avatarUrl !== undefined && u.avatar === undefined) {
       u.avatar = u.avatarUrl;
       hasChanged = true;
     }
@@ -157,13 +161,15 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
     userMap.set(u.id, u);
   }
 
-  // Ensure evaluator_1 and user_admin_1 exist in map
+  // Ensure evaluator_1 and user_admin_1 exist in map if completely absent
   if (!userMap.has('evaluator_1')) {
-    userMap.set('evaluator_1', INITIAL_USERS.find((u) => u.id === 'evaluator_1')!);
+    const defaultEv = INITIAL_USERS.find((u) => u.id === 'evaluator_1');
+    if (defaultEv) userMap.set('evaluator_1', defaultEv);
     hasChanged = true;
   }
   if (!userMap.has('user_admin_1')) {
-    userMap.set('user_admin_1', INITIAL_USERS.find((u) => u.id === 'user_admin_1')!);
+    const defaultAdmin = INITIAL_USERS.find((u) => u.id === 'user_admin_1');
+    if (defaultAdmin) userMap.set('user_admin_1', defaultAdmin);
     hasChanged = true;
   }
 
@@ -261,6 +267,21 @@ const STORAGE_KEYS = {
   SETTINGS: 'pes_settings_v9',
   FIREBASE_INITIALIZED: 'pes_firebase_initialized_v9',
 };
+
+// Multi-tab / multi-window instant real-time synchronization
+const syncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
+  ? new BroadcastChannel('app_performance_realtime_sync')
+  : null;
+
+function broadcastSync(type: string, payload: any) {
+  try {
+    if (syncChannel) {
+      syncChannel.postMessage({ type, payload, timestamp: Date.now() });
+    }
+  } catch (e) {
+    // Ignore channel errors
+  }
+}
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isFirebaseSyncing, setIsFirebaseSyncing] = useState<boolean>(false);
@@ -408,6 +429,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let unsubThresholds: (() => void) | undefined;
     let unsubLogs: (() => void) | undefined;
 
+    // Cross-tab real-time sync event listener
+    const handleChannelMessage = (event: MessageEvent) => {
+      try {
+        const { type, payload } = event.data || {};
+        if (type === 'USERS_UPDATE' && Array.isArray(payload)) {
+          setUsers(payload);
+        } else if (type === 'USER_SINGLE_UPDATE' && payload?.id) {
+          setUsers((prev) => prev.map((u) => (u.id === payload.id ? payload : u)));
+          if (currentUser.id === payload.id) {
+            setCurrentUser(payload);
+          }
+        } else if (type === 'SUBMISSIONS_UPDATE' && Array.isArray(payload)) {
+          setSubmissions(payload);
+        } else if (type === 'SUBMISSION_SINGLE_UPDATE' && payload?.id) {
+          setSubmissions((prev) => {
+            const filtered = prev.filter((s) => s.id !== payload.id);
+            return [payload, ...filtered];
+          });
+        } else if (type === 'SETTINGS_UPDATE' && payload) {
+          setSystemSettings((prev) => ({ ...prev, ...payload }));
+        } else if (type === 'GROUPS_UPDATE' && Array.isArray(payload)) {
+          setCommitteeGroups(payload);
+        } else if (type === 'TARGET_GROUPS_UPDATE' && Array.isArray(payload)) {
+          setTargetPositionGroups(payload);
+        } else if (type === 'TEMPLATES_UPDATE' && Array.isArray(payload)) {
+          setFormTemplates(payload);
+        }
+      } catch (err) {
+        console.error('Channel message handling error:', err);
+      }
+    };
+
+    if (syncChannel) {
+      syncChannel.addEventListener('message', handleChannelMessage);
+    }
+
     const setupFirebaseSync = async () => {
       try {
         setIsFirebaseSyncing(true);
@@ -416,9 +473,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const remoteUsers = await FirebaseService.getUsers();
         const remoteSettings = await FirebaseService.getSystemSettings();
 
-        // If Firestore is empty or has an older partial dataset (< 30 staff members)
-        if (!remoteSettings || !remoteUsers || remoteUsers.length < 30) {
-          console.log('Syncing and seeding complete initial dataset (30 evaluatees + committees) to Firebase Firestore...');
+        // Seed initial data ONLY if Firestore is completely empty
+        if ((!remoteUsers || remoteUsers.length === 0) && !remoteSettings) {
+          console.log('Seeding initial data to empty Firebase Firestore...');
           await FirebaseService.seedInitialData(
             INITIAL_USERS,
             INITIAL_COMMITTEE_GROUPS,
@@ -428,43 +485,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             GRADE_THRESHOLDS,
             INITIAL_TARGET_POSITION_GROUPS
           );
-        } else {
-          // Check if remote roles need synchronization for Pratchya and Rannaphat
-          const pratchyaRemote = remoteUsers.find((u) => u.name.includes('ปรัชญา'));
-          const rannaphatRemote = remoteUsers.find((u) => u.name.includes('รัณย์ณภัทร'));
-          if ((pratchyaRemote && pratchyaRemote.role === 'admin') || (rannaphatRemote && rannaphatRemote.role !== 'admin')) {
-            console.log('Synchronizing swapped roles to Firebase Firestore...');
-            if (pratchyaRemote) {
-              await FirebaseService.saveUser({
-                ...pratchyaRemote,
-                role: 'evaluator',
-                position: 'ผู้อำนวยการชำนาญการพิเศษ (ประธานกรรมการอำนวยการ / คณะกรรมการ)',
-                avatarUrl: OFFICIAL_AVATARS['evaluator_director'],
-                avatar: OFFICIAL_AVATARS['evaluator_director'],
-              });
-            }
-            if (rannaphatRemote) {
-              await FirebaseService.saveUser({
-                ...rannaphatRemote,
-                role: 'admin',
-                position: 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)',
-                avatarUrl: OFFICIAL_AVATARS['user_admin_1'],
-                avatar: OFFICIAL_AVATARS['user_admin_1'],
-              });
-            }
-          }
-
-          // Check if any committee or admin needs official avatar default on Firestore if empty
-          for (const remoteUser of remoteUsers) {
-            if (OFFICIAL_AVATARS[remoteUser.id] && !remoteUser.avatarUrl && !remoteUser.avatar) {
-              console.log(`Setting default official avatar for ${remoteUser.name} on Firestore...`);
-              await FirebaseService.saveUser({
-                ...remoteUser,
-                avatarUrl: OFFICIAL_AVATARS[remoteUser.id],
-                avatar: OFFICIAL_AVATARS[remoteUser.id],
-              });
-            }
-          }
         }
 
         // Setup real-time listeners for all models across all devices (PC, Android, iOS)
@@ -478,6 +498,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (remoteUsers && remoteUsers.length > 0) {
             const { sanitized } = sanitizeAndFixUsers(remoteUsers);
             setUsers(sanitized);
+            setCurrentUser((prevCurr) => {
+              const matched = sanitized.find((u) => u.id === prevCurr.id);
+              return matched ? { ...prevCurr, ...matched } : prevCurr;
+            });
           }
         });
 
@@ -489,84 +513,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         unsubTargetGroups = FirebaseService.listenTargetPositionGroups((remoteTargetGroups) => {
           if (remoteTargetGroups && remoteTargetGroups.length > 0) {
-            const needsUpgrade =
-              remoteTargetGroups.length < 3 ||
-              remoteTargetGroups.some(
-                (g) =>
-                  g.name.includes('กลุ่มที่ 1: ลูกจ้างชั่วคราว') ||
-                  g.name.includes('กลุ่มที่ 2: ลูกจ้างชั่วคราว') ||
-                  g.code?.includes('(ครูผู้ช่วย)') ||
-                  g.code?.includes('(จ้างเหมาบริการ)')
-              );
-            if (needsUpgrade) {
-              console.log('Upgrading target position groups to include Group 3 and updated clean names in Firebase...');
-              INITIAL_TARGET_POSITION_GROUPS.forEach((tg) => {
-                FirebaseService.saveTargetPositionGroup(tg).catch(console.error);
-              });
-              setTargetPositionGroups(INITIAL_TARGET_POSITION_GROUPS);
-            } else {
-              setTargetPositionGroups(remoteTargetGroups);
-            }
-          } else {
-            INITIAL_TARGET_POSITION_GROUPS.forEach((tg) => {
-              FirebaseService.saveTargetPositionGroup(tg).catch(console.error);
-            });
-            setTargetPositionGroups(INITIAL_TARGET_POSITION_GROUPS);
+            setTargetPositionGroups(remoteTargetGroups);
           }
         });
 
         unsubTemplates = FirebaseService.listenFormTemplates((remoteTemplates) => {
           if (remoteTemplates && remoteTemplates.length > 0) {
-            let updatedList = [...remoteTemplates];
-            let modified = false;
-
-            const hasGovTeacher = updatedList.some((t) => t.id === 'form_government_employee_teacher');
-            if (!hasGovTeacher) {
-              const govTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_government_employee_teacher');
-              if (govTemplate) {
-                FirebaseService.saveFormTemplate(govTemplate).catch(console.error);
-                updatedList.push(govTemplate);
-                modified = true;
-              }
-            }
-
-            const hasClerical = updatedList.some((t) => t.id === 'form_support_clerical');
-            if (!hasClerical) {
-              const clericalTemplate = FORM_TEMPLATES.find((t) => t.id === 'form_support_clerical');
-              if (clericalTemplate) {
-                FirebaseService.saveFormTemplate(clericalTemplate).catch(console.error);
-                updatedList.push(clericalTemplate);
-                modified = true;
-              }
-            }
-
-            setFormTemplates(updatedList);
+            setFormTemplates(remoteTemplates);
           }
         });
 
         unsubSubs = FirebaseService.listenSubmissions((remoteSubs) => {
           if (remoteSubs) {
-            // Deduplicate remote submissions by evaluateeId and evaluatorId, keeping latest submittedAt
+            // Deduplicate remote submissions in memory by evaluateeId and evaluatorId, keeping latest submittedAt
             const subMap = new Map<string, EvaluationSubmission>();
             const sorted = [...remoteSubs].sort(
               (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
             );
-            const duplicatesToDelete: string[] = [];
-
             sorted.forEach((sub) => {
               const key = `${sub.evaluateeId}_${sub.evaluatorId}`;
-              const prev = subMap.get(key);
-              if (prev && prev.id !== sub.id) {
-                duplicatesToDelete.push(prev.id);
-              }
               subMap.set(key, sub);
             });
-
-            // Clean up duplicate documents from Firestore
-            duplicatesToDelete.forEach((dupId) => {
-              FirebaseService.deleteSubmission(dupId).catch(console.error);
-            });
-
             setSubmissions(Array.from(subMap.values()));
           }
         });
@@ -595,6 +562,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setupFirebaseSync();
 
     return () => {
+      if (syncChannel) {
+        syncChannel.removeEventListener('message', handleChannelMessage);
+      }
       if (unsubUsers) unsubUsers();
       if (unsubGroups) unsubGroups();
       if (unsubTargetGroups) unsubTargetGroups();
@@ -788,21 +758,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           !(s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId) &&
           s.id !== submissionId
       );
-      return [newSubmission, ...filtered];
+      const next = [newSubmission, ...filtered];
+      broadcastSync('SUBMISSIONS_UPDATE', next);
+      return next;
     });
 
     clearDraftEvaluation(data.evaluateeId, data.formId);
 
     // Save to Firebase (triggers real-time broadcast to all connected devices)
     FirebaseService.saveSubmission(newSubmission).catch(console.error);
-
-    // If there were other duplicate submissions for this evaluator & evaluatee, clean them up from Firestore
-    const duplicates = submissions.filter(
-      (s) => s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId && s.id !== submissionId
-    );
-    duplicates.forEach((dup) => {
-      FirebaseService.deleteSubmission(dup.id).catch(console.error);
-    });
 
     logAudit(
       'SUBMIT_EVALUATION',
@@ -839,7 +803,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = submissions.find((s) => s.id === submissionId);
     if (!target) return;
 
-    setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+    setSubmissions((prev) => {
+      const next = prev.filter((s) => s.id !== submissionId);
+      broadcastSync('SUBMISSIONS_UPDATE', next);
+      return next;
+    });
     clearDraftEvaluation(target.evaluateeId, target.formId);
 
     FirebaseService.deleteSubmission(submissionId).catch(console.error);
@@ -857,9 +825,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     if (!target) return;
 
-    setSubmissions((prev) =>
-      prev.filter((s) => !(s.evaluateeId === evaluateeId && s.evaluatorId === evaluatorId))
-    );
+    setSubmissions((prev) => {
+      const next = prev.filter((s) => !(s.evaluateeId === evaluateeId && s.evaluatorId === evaluatorId));
+      broadcastSync('SUBMISSIONS_UPDATE', next);
+      return next;
+    });
     clearDraftEvaluation(evaluateeId, target.formId);
 
     if (target.id) {
@@ -875,9 +845,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Update existing evaluation submission
   const updateSubmission = (updatedSubmission: EvaluationSubmission) => {
     const finalized = { ...updatedSubmission, submittedAt: new Date().toISOString() };
-    setSubmissions((prev) =>
-      prev.map((s) => (s.id === finalized.id ? finalized : s))
-    );
+    setSubmissions((prev) => {
+      const next = prev.map((s) => (s.id === finalized.id ? finalized : s));
+      broadcastSync('SUBMISSIONS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveSubmission(finalized).catch(console.error);
     logAudit(
       'UPDATE_EVALUATION',
@@ -905,7 +877,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             (s.evaluateeId === data.evaluateeId && s.evaluatorId === data.evaluatorId)
           )
       );
-      return [finalSubmission, ...filtered];
+      const next = [finalSubmission, ...filtered];
+      broadcastSync('SUBMISSIONS_UPDATE', next);
+      return next;
     });
 
     FirebaseService.saveSubmission(finalSubmission).catch(console.error);
@@ -920,7 +894,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Committee Group CRUD
   const updateCommitteeGroup = (group: CommitteeGroup) => {
-    setCommitteeGroups((prev) => prev.map((g) => (g.id === group.id ? group : g)));
+    setCommitteeGroups((prev) => {
+      const next = prev.map((g) => (g.id === group.id ? group : g));
+      broadcastSync('GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveCommitteeGroup(group).catch(console.error);
     logAudit('UPDATE_COMMITTEE_GROUP', `แก้ไขข้อมูลกลุ่มคณะกรรมการ: ${group.name}`);
   };
@@ -931,13 +909,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 'group_' + (committeeGroups.length + 1) + '_' + Date.now().toString(36),
       createdAt: new Date().toISOString(),
     };
-    setCommitteeGroups((prev) => [...prev, newGroup]);
+    setCommitteeGroups((prev) => {
+      const next = [...prev, newGroup];
+      broadcastSync('GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveCommitteeGroup(newGroup).catch(console.error);
     logAudit('CREATE_COMMITTEE_GROUP', `สร้างกลุ่มคณะกรรมการใหม่: ${newGroup.name}`);
   };
 
   const deleteCommitteeGroup = (groupId: string) => {
-    setCommitteeGroups((prev) => prev.filter((g) => g.id !== groupId));
+    setCommitteeGroups((prev) => {
+      const next = prev.filter((g) => g.id !== groupId);
+      broadcastSync('GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.deleteCommitteeGroup(groupId).catch(console.error);
     logAudit('DELETE_COMMITTEE_GROUP', `ลบกลุ่มคณะกรรมการรหัส: ${groupId}`);
   };
@@ -952,7 +938,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    setTargetPositionGroups((prev) => [...prev, newGroup]);
+    setTargetPositionGroups((prev) => {
+      const next = [...prev, newGroup];
+      broadcastSync('TARGET_GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveTargetPositionGroup(newGroup).catch(console.error);
     logAudit('CREATE_TARGET_POSITION_GROUP', `เพิ่มกลุ่มสายงานเป้าหมายใหม่: ${newGroup.name} (${newGroup.code})`);
     return newGroup;
@@ -960,14 +950,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateTargetPositionGroup = (group: TargetPositionGroup) => {
     const updated = { ...group, updatedAt: new Date().toISOString() };
-    setTargetPositionGroups((prev) => prev.map((g) => (g.id === group.id ? updated : g)));
+    setTargetPositionGroups((prev) => {
+      const next = prev.map((g) => (g.id === group.id ? updated : g));
+      broadcastSync('TARGET_GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveTargetPositionGroup(updated).catch(console.error);
     logAudit('UPDATE_TARGET_POSITION_GROUP', `แก้ไข/เปลี่ยนชื่อกลุ่มสายงานเป้าหมาย: ${group.name} (${group.code})`);
   };
 
   const deleteTargetPositionGroup = (groupId: string) => {
     const groupToDelete = targetPositionGroups.find((g) => g.id === groupId);
-    setTargetPositionGroups((prev) => prev.filter((g) => g.id !== groupId));
+    setTargetPositionGroups((prev) => {
+      const next = prev.filter((g) => g.id !== groupId);
+      broadcastSync('TARGET_GROUPS_UPDATE', next);
+      return next;
+    });
     FirebaseService.deleteTargetPositionGroup(groupId).catch(console.error);
     logAudit('DELETE_TARGET_POSITION_GROUP', `ลบกลุ่มสายงานเป้าหมาย: ${groupToDelete?.name || groupId}`);
   };
@@ -975,7 +973,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // User Management CRUD
   const addUser = (userData: Omit<User, 'id'>): User => {
     const newId = (userData.role === 'evaluator' ? 'evaluator_' : userData.role === 'admin' ? 'user_admin_' : 'staff_') + Date.now();
-    const avatarValue = userData.avatar || userData.avatarUrl || undefined;
+    const avatarValue = userData.avatar !== undefined ? userData.avatar : userData.avatarUrl;
     const newUser: User = {
       ...userData,
       id: newId,
@@ -983,54 +981,165 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: avatarValue,
       avatarUrl: avatarValue,
     };
-    setUsers((prev) => [newUser, ...prev]);
+    setUsers((prev) => {
+      const next = [newUser, ...prev];
+      broadcastSync('USERS_UPDATE', next);
+      return next;
+    });
     FirebaseService.saveUser(newUser).catch(console.error);
     logAudit('CREATE_USER', `เพิ่มผู้ใช้งานใหม่: ${newUser.name} (${newUser.position}) [${newUser.role}]`);
     return newUser;
   };
 
   const updateUser = (user: User) => {
-    const avatarValue = user.avatar || user.avatarUrl || undefined;
+    const avatarValue = user.avatar !== undefined ? user.avatar : user.avatarUrl;
     const synchronizedUser: User = {
       ...user,
       avatar: avatarValue,
       avatarUrl: avatarValue,
     };
-    setUsers((prev) => prev.map((u) => (u.id === synchronizedUser.id ? synchronizedUser : u)));
+
+    setUsers((prev) => {
+      const next = prev.map((u) => (u.id === synchronizedUser.id ? synchronizedUser : u));
+      broadcastSync('USERS_UPDATE', next);
+      return next;
+    });
+
     if (currentUser.id === synchronizedUser.id) {
       setCurrentUser(synchronizedUser);
     }
+
+    // Synchronously update evaluatee & evaluator references in all submissions so scores, candidate cards, and report headers update immediately
+    setSubmissions((prev) => {
+      let modified = false;
+      const nextSubs = prev.map((s) => {
+        let changed = false;
+        const updated = { ...s };
+        if (s.evaluateeId === synchronizedUser.id) {
+          if (updated.evaluateeName !== synchronizedUser.name) {
+            updated.evaluateeName = synchronizedUser.name;
+            changed = true;
+          }
+          if (updated.evaluateePosition !== synchronizedUser.position) {
+            updated.evaluateePosition = synchronizedUser.position;
+            changed = true;
+          }
+          if (updated.evaluateeDepartment !== synchronizedUser.department) {
+            updated.evaluateeDepartment = synchronizedUser.department;
+            changed = true;
+          }
+          if (synchronizedUser.avatar !== undefined && updated.evaluateeAvatar !== synchronizedUser.avatar) {
+            updated.evaluateeAvatar = synchronizedUser.avatar;
+            changed = true;
+          }
+        }
+        if (s.evaluatorId === synchronizedUser.id) {
+          if (updated.evaluatorName !== synchronizedUser.name) {
+            updated.evaluatorName = synchronizedUser.name;
+            changed = true;
+          }
+          if (updated.evaluatorPosition !== synchronizedUser.position) {
+            updated.evaluatorPosition = synchronizedUser.position;
+            changed = true;
+          }
+        }
+        if (changed) {
+          modified = true;
+          FirebaseService.saveSubmission(updated).catch(() => {});
+          return updated;
+        }
+        return s;
+      });
+      if (modified) {
+        broadcastSync('SUBMISSIONS_UPDATE', nextSubs);
+      }
+      return nextSubs;
+    });
+
     FirebaseService.saveUser(synchronizedUser).catch(console.error);
     logAudit('UPDATE_USER', `แก้ไขข้อมูลผู้ใช้งาน: ${synchronizedUser.name} (${synchronizedUser.position})`);
   };
 
   const updateUserProfile = (userId: string, updates: Partial<User>) => {
-    const avatarValue = updates.avatar || updates.avatarUrl || undefined;
+    const avatarValue = updates.avatar !== undefined ? updates.avatar : updates.avatarUrl;
     const normalizedUpdates: Partial<User> = {
       ...updates,
-      ...(updates.avatar || updates.avatarUrl ? { avatar: avatarValue, avatarUrl: avatarValue } : {}),
-      ...(updates.avatar === '' || updates.avatarUrl === '' ? { avatar: '', avatarUrl: '' } : {}),
+      ...(avatarValue !== undefined ? { avatar: avatarValue, avatarUrl: avatarValue } : {}),
     };
 
-    setUsers((prev) =>
-      prev.map((u) => {
+    let updatedUserObj: User | null = null;
+    setUsers((prev) => {
+      const next = prev.map((u) => {
         if (u.id === userId) {
           const updatedUser = { ...u, ...normalizedUpdates };
+          updatedUserObj = updatedUser;
           FirebaseService.saveUser(updatedUser).catch(console.error);
           return updatedUser;
         }
         return u;
-      })
-    );
+      });
+      broadcastSync('USERS_UPDATE', next);
+      return next;
+    });
+
     if (currentUser.id === userId) {
       setCurrentUser((prev) => ({ ...prev, ...normalizedUpdates }));
     }
+
+    // Synchronously update submissions for real-time consistency
+    setSubmissions((prev) => {
+      let modified = false;
+      const nextSubs = prev.map((s) => {
+        let changed = false;
+        const updated = { ...s };
+        if (s.evaluateeId === userId) {
+          if (updates.name && updated.evaluateeName !== updates.name) {
+            updated.evaluateeName = updates.name;
+            changed = true;
+          }
+          if (updates.position && updated.evaluateePosition !== updates.position) {
+            updated.evaluateePosition = updates.position;
+            changed = true;
+          }
+          if (updates.department && updated.evaluateeDepartment !== updates.department) {
+            updated.evaluateeDepartment = updates.department;
+            changed = true;
+          }
+          if (avatarValue !== undefined && updated.evaluateeAvatar !== avatarValue) {
+            updated.evaluateeAvatar = avatarValue;
+            changed = true;
+          }
+        }
+        if (s.evaluatorId === userId) {
+          if (updates.name && updated.evaluatorName !== updates.name) {
+            updated.evaluatorName = updates.name;
+            changed = true;
+          }
+          if (updates.position && updated.evaluatorPosition !== updates.position) {
+            updated.evaluatorPosition = updates.position;
+            changed = true;
+          }
+        }
+        if (changed) {
+          modified = true;
+          FirebaseService.saveSubmission(updated).catch(() => {});
+          return updated;
+        }
+        return s;
+      });
+      if (modified) {
+        broadcastSync('SUBMISSIONS_UPDATE', nextSubs);
+      }
+      return nextSubs;
+    });
+
     logAudit('UPDATE_PROFILE', `อัปเดตข้อมูลโปรไฟล์และรูปภาพ: ${updates.name || currentUser.name}`);
   };
 
   const updateSystemSettings = (newSettings: Partial<SystemSettings>) => {
     setSystemSettings((prev) => {
       const updated = { ...prev, ...newSettings };
+      broadcastSync('SETTINGS_UPDATE', updated);
       FirebaseService.saveSystemSettings(updated).catch(console.error);
       return updated;
     });
@@ -1039,28 +1148,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resetSystemSettings = () => {
     setSystemSettings(DEFAULT_SETTINGS);
+    broadcastSync('SETTINGS_UPDATE', DEFAULT_SETTINGS);
     FirebaseService.saveSystemSettings(DEFAULT_SETTINGS).catch(console.error);
     logAudit('RESET_SYSTEM_SETTINGS', 'คืนค่าการตั้งค่าระบบเป็นค่าเริ่มต้น');
   };
 
   const deleteUser = (userId: string) => {
     const userToDelete = users.find((u) => u.id === userId);
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    setUsers((prev) => {
+      const next = prev.filter((u) => u.id !== userId);
+      broadcastSync('USERS_UPDATE', next);
+      return next;
+    });
     FirebaseService.deleteUser(userId).catch(console.error);
     logAudit('DELETE_USER', `ลบผู้ใช้งาน: ${userToDelete?.name || userId}`);
   };
 
   const resetUserPassword = (userId: string, newPassword: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
+    setUsers((prev) => {
+      const next = prev.map((u) => {
         if (u.id === userId) {
           const updated = { ...u, password: newPassword };
           FirebaseService.saveUser(updated).catch(console.error);
           return updated;
         }
         return u;
-      })
-    );
+      });
+      broadcastSync('USERS_UPDATE', next);
+      return next;
+    });
     const user = users.find((u) => u.id === userId);
     logAudit('RESET_USER_PASSWORD', `รีเซ็ตรหัสผ่านของผู้ใช้งาน: ${user?.name || userId}`);
   };

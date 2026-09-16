@@ -475,8 +475,8 @@ export const UserManagementView: React.FC = () => {
       phone: formData.phone,
       employeeCode: formData.employeeCode,
       positionNumber: formData.positionNumber,
-      avatar: formData.avatar || undefined,
-      avatarUrl: formData.avatar || undefined,
+      avatar: formData.avatar,
+      avatarUrl: formData.avatar,
       leaveStats: formData.role === 'staff' ? formData.leaveStats : undefined,
       formTemplateId: formData.role === 'staff' ? formData.formTemplateId : undefined,
     });

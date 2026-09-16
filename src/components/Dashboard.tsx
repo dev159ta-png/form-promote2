@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Users,
@@ -63,8 +63,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
   const [aiExecutiveSummary, setAiExecutiveSummary] = useState<string | null>(null);
-  const [selectedCandidateForDetails, setSelectedCandidateForDetails] = useState<AggregatedResult | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
+
+  const selectedCandidateForDetails = useMemo(() => {
+    if (!selectedCandidateId) return null;
+    return aggregatedResults.find((r) => r.evaluatee.id === selectedCandidateId) || null;
+  }, [selectedCandidateId, aggregatedResults]);
 
   const handleDownloadTablePdf = async (item: AggregatedResult) => {
     setDownloadingPdfId(item.evaluatee.id);
@@ -653,7 +658,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
                       hasUserEvaluated={hasUserEvaluated}
                       onEvaluate={handleStartEvaluate}
                       onOpenReport={onOpenReport}
-                      onOpenDetails={setSelectedCandidateForDetails}
+                      onOpenDetails={(item) => setSelectedCandidateId(item.evaluatee.id)}
                     />
                   );
                 })}
@@ -717,7 +722,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
                           {/* Evaluatee Name & Position */}
                           <td
                             className="px-5 py-4 cursor-pointer group/row"
-                            onClick={() => setSelectedCandidateForDetails(item)}
+                            onClick={() => setSelectedCandidateId(item.evaluatee.id)}
                           >
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-slate-900 group-hover/row:text-teal-700 transition">
@@ -814,7 +819,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
                               {/* Details Modal Button */}
                               <button
                                 type="button"
-                                onClick={() => setSelectedCandidateForDetails(item)}
+                                onClick={() => setSelectedCandidateId(item.evaluatee.id)}
                                 className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer"
                                 title="ดูรายละเอียดคณะกรรมการ (ประเมินแล้ว/รอประเมิน)"
                               >
@@ -902,7 +907,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenReport }) => {
       {selectedCandidateForDetails && (
         <CandidateDetailModal
           item={selectedCandidateForDetails}
-          onClose={() => setSelectedCandidateForDetails(null)}
+          onClose={() => setSelectedCandidateId(null)}
           onOpenSummaryReport={onOpenReport}
           onEvaluate={handleStartEvaluate}
           gradeThresholds={gradeThresholds}

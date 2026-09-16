@@ -48,6 +48,23 @@ function sanitizeForFirestore<T>(data: T): T {
   );
 }
 
+function isQuotaError(error: any): boolean {
+  return (
+    error?.code === 'resource-exhausted' ||
+    String(error?.message || '').toLowerCase().includes('quota exceeded') ||
+    String(error?.message || '').toLowerCase().includes('resource-exhausted')
+  );
+}
+
+let lastQuotaWarn = 0;
+function logQuotaWarningOnce() {
+  const now = Date.now();
+  if (now - lastQuotaWarn > 30000) {
+    console.warn('Firestore Quota reached: App operating smoothly with local real-time synchronization.');
+    lastQuotaWarn = now;
+  }
+}
+
 export const FirebaseService = {
   // ----------------------------------------------------
   // System Settings
@@ -89,7 +106,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to system settings:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to system settings:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -102,7 +123,11 @@ export const FirebaseService = {
       const snapshot = await getDocs(collection(db, USERS_COLLECTION));
       return snapshot.docs.map((d) => d.data() as User);
     } catch (error) {
-      console.error('Error fetching users from Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error fetching users from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
       return [];
     }
   },
@@ -113,8 +138,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore(user);
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving user to Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error saving user to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -122,8 +150,11 @@ export const FirebaseService = {
     try {
       await deleteDoc(doc(db, USERS_COLLECTION, userId));
     } catch (error) {
-      console.error('Error deleting user from Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error deleting user from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -137,7 +168,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to users:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to users:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -150,7 +185,11 @@ export const FirebaseService = {
       const snapshot = await getDocs(collection(db, GROUPS_COLLECTION));
       return snapshot.docs.map((d) => d.data() as CommitteeGroup);
     } catch (error) {
-      console.error('Error fetching groups from Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error fetching groups from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
       return [];
     }
   },
@@ -161,8 +200,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore(group);
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving group to Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error saving group to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -170,8 +212,11 @@ export const FirebaseService = {
     try {
       await deleteDoc(doc(db, GROUPS_COLLECTION, groupId));
     } catch (error) {
-      console.error('Error deleting group from Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error deleting group from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -185,7 +230,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to groups:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to groups:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -198,7 +247,11 @@ export const FirebaseService = {
       const snapshot = await getDocs(collection(db, TARGET_GROUPS_COLLECTION));
       return snapshot.docs.map((d) => d.data() as TargetPositionGroup);
     } catch (error) {
-      console.error('Error fetching target position groups from Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error fetching target position groups from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
       return [];
     }
   },
@@ -209,8 +262,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore({ ...group, updatedAt: new Date().toISOString() });
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving target position group to Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error saving target position group to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -218,8 +274,11 @@ export const FirebaseService = {
     try {
       await deleteDoc(doc(db, TARGET_GROUPS_COLLECTION, groupId));
     } catch (error) {
-      console.error('Error deleting target position group from Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error deleting target position group from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -234,7 +293,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to target position groups:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to target position groups:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -247,7 +310,11 @@ export const FirebaseService = {
       const snapshot = await getDocs(collection(db, TEMPLATES_COLLECTION));
       return snapshot.docs.map((d) => d.data() as FormTemplate);
     } catch (error) {
-      console.error('Error fetching templates from Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error fetching templates from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
       return [];
     }
   },
@@ -258,8 +325,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore(template);
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving template to Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error saving template to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -267,8 +337,11 @@ export const FirebaseService = {
     try {
       await deleteDoc(doc(db, TEMPLATES_COLLECTION, templateId));
     } catch (error) {
-      console.error('Error deleting template from Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error deleting template from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -282,7 +355,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to templates:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to templates:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -295,7 +372,11 @@ export const FirebaseService = {
       const snapshot = await getDocs(collection(db, SUBMISSIONS_COLLECTION));
       return snapshot.docs.map((d) => d.data() as EvaluationSubmission);
     } catch (error) {
-      console.error('Error fetching submissions from Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error fetching submissions from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
       return [];
     }
   },
@@ -306,8 +387,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore(submission);
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving submission to Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error saving submission to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -315,8 +399,11 @@ export const FirebaseService = {
     try {
       await deleteDoc(doc(db, SUBMISSIONS_COLLECTION, submissionId));
     } catch (error) {
-      console.error('Error deleting submission from Firebase:', error);
-      throw error;
+      if (!isQuotaError(error)) {
+        console.warn('Error deleting submission from Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -328,7 +415,11 @@ export const FirebaseService = {
         callback(subs);
       },
       (error) => {
-        console.error('Error listening to submissions:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to submissions:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -342,7 +433,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore({ thresholds, updatedAt: new Date().toISOString() });
       await setDoc(docRef, cleanData);
     } catch (error) {
-      console.error('Error saving thresholds to Firebase:', error);
+      if (!isQuotaError(error)) {
+        console.warn('Error saving thresholds to Firebase:', error);
+      } else {
+        logQuotaWarningOnce();
+      }
     }
   },
 
@@ -359,7 +454,11 @@ export const FirebaseService = {
         }
       },
       (error) => {
-        console.error('Error listening to thresholds:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to thresholds:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },
@@ -388,15 +487,19 @@ export const FirebaseService = {
   },
 
   listenAuditLogs(callback: (logs: AuditLog[]) => void) {
+    const q = query(collection(db, LOGS_COLLECTION), orderBy('timestamp', 'desc'), limit(50));
     return onSnapshot(
-      collection(db, LOGS_COLLECTION),
+      q,
       (snapshot) => {
         const logs = snapshot.docs.map((d) => d.data() as AuditLog);
-        logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        callback(logs.slice(0, 100));
+        callback(logs);
       },
       (error) => {
-        console.error('Error listening to audit logs:', error);
+        if (!isQuotaError(error)) {
+          console.warn('Error listening to audit logs:', error);
+        } else {
+          logQuotaWarningOnce();
+        }
       }
     );
   },

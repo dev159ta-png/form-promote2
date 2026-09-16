@@ -45,30 +45,34 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
   onEvaluate,
   gradeThresholds,
 }) => {
-  const { users, committeeGroups, currentUser, systemSettings } = useApp();
+  const { users, committeeGroups, currentUser, systemSettings, submissions: allSubmissions, aggregatedResults } = useApp();
   const [selectedSubmission, setSelectedSubmission] = useState<EvaluationSubmission | null>(null);
   const [adminEditingSubmission, setAdminEditingSubmission] = useState<EvaluationSubmission | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   if (!item) return null;
 
+  // Live updated data from AppContext
+  const currentItem = aggregatedResults.find((r) => r.evaluatee.id === item.evaluatee.id) || item;
+  const evaluatee = users.find((u) => u.id === item.evaluatee.id) || currentItem.evaluatee;
+  const submissions = allSubmissions.filter((s) => s.evaluateeId === evaluatee.id && !s.isDraft);
+
   const handleDownloadPdf = async () => {
     setIsDownloadingPdf(true);
     try {
-      await downloadIndividualPdf(item, systemSettings, gradeThresholds);
+      await downloadIndividualPdf(currentItem, systemSettings, gradeThresholds);
     } catch (err) {
       console.error('Download PDF error:', err);
-      onOpenSummaryReport(item);
+      onOpenSummaryReport(currentItem);
     } finally {
       setIsDownloadingPdf(false);
     }
   };
 
-  const { evaluatee, submissions, gradeThresholds: itemThresholds } = item;
-  const gradeInfo = getGradeInfo(item.finalGrade, gradeThresholds);
+  const gradeInfo = getGradeInfo(currentItem.finalGrade, gradeThresholds);
 
   // Find committee group
-  const group = committeeGroups.find((g) => g.id === item.groupId) || committeeGroups[0];
+  const group = committeeGroups.find((g) => g.id === currentItem.groupId) || committeeGroups[0];
   
   // List of all evaluators assigned in this committee group
   const groupEvaluators: User[] = (group?.evaluatorIds || [])
@@ -80,7 +84,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
     submissions.some((s) => s.evaluatorId === ev.id && !s.isDraft)
   ).length;
 
-  const totalEvaluatorsCount = groupEvaluators.length || item.totalCommitteeCount || 3;
+  const totalEvaluatorsCount = groupEvaluators.length || currentItem.totalCommitteeCount || 3;
 
   // Progress percentage
   const progressPercent = totalEvaluatorsCount > 0 ? (completedEvaluatorsCount / totalEvaluatorsCount) * 100 : 0;
@@ -156,11 +160,11 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                   {completedEvaluatorsCount > 0 ? (
                     <>
                       <div className="text-2xl sm:text-3xl font-black text-sky-700 leading-tight">
-                        {item.meanPercentage.toFixed(item.meanPercentage % 1 === 0 ? 0 : 2)}%
+                        {currentItem.meanPercentage.toFixed(currentItem.meanPercentage % 1 === 0 ? 0 : 2)}%
                       </div>
                       <div className="flex flex-col items-center">
                         <span className="inline-block bg-sky-100 text-sky-800 text-[11px] font-bold px-2 py-0.5 rounded-full mt-0.5">
-                          {item.finalGrade}
+                          {currentItem.finalGrade}
                         </span>
                         <span className="text-[10px] text-slate-500 font-medium mt-0.5">คะแนนเฉลี่ย</span>
                       </div>
@@ -528,7 +532,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                             type="button"
                             onClick={() => {
                               onClose();
-                              onEvaluate(evaluatee.id, item.formId);
+                              onEvaluate(evaluatee.id, currentItem.formId);
                             }}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
                           >
@@ -549,7 +553,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
       {/* Individual Evaluator Score Sheet Modal */}
       {selectedSubmission && (
         <SingleEvaluationModal
-          submission={selectedSubmission}
+          submission={allSubmissions.find((s) => s.id === selectedSubmission.id) || selectedSubmission}
           onClose={() => setSelectedSubmission(null)}
           thresholds={gradeThresholds}
         />
@@ -558,7 +562,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
       {/* Admin Edit / Delete Submission Modal */}
       {adminEditingSubmission && (
         <AdminEditSubmissionModal
-          submission={adminEditingSubmission}
+          submission={allSubmissions.find((s) => s.id === adminEditingSubmission.id) || adminEditingSubmission}
           onClose={() => setAdminEditingSubmission(null)}
         />
       )}
