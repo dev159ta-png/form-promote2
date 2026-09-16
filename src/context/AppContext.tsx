@@ -7,12 +7,8 @@ import {
   EvaluationSubmission,
   AggregatedResult,
   AuditLog,
-  AuditActionCategory,
-  SystemBackupData,
-  LocalSnapshotItem,
   SystemSettings,
   TargetPositionGroup,
-  UserRole,
 } from '../types';
 import {
   INITIAL_USERS,
@@ -25,15 +21,6 @@ import { FORM_TEMPLATES } from '../data/formTemplates';
 import { calculateAggregatedResult, getFormTemplateForUser } from '../utils/evaluationCalculator';
 import { CHAINAT_SCHOOL_LOGO } from '../data/presetLogos';
 import { FirebaseService } from '../firebase/firebaseService';
-import {
-  buildSystemBackupData,
-  downloadJsonFile,
-  downloadCsvFile,
-  generateSurveyCsv,
-  loadLocalSnapshots,
-  saveLocalSnapshots,
-  MAX_SNAPSHOTS,
-} from '../utils/backupUtils';
 
 export type ViewType =
   | 'dashboard'
@@ -45,9 +32,7 @@ export type ViewType =
   | 'forms_admin'
   | 'my_evaluation'
   | 'schema'
-  | 'settings'
-  | 'audit_logs'
-  | 'backup';
+  | 'settings';
 
 export const DEFAULT_SETTINGS: SystemSettings = {
   appName: 'ระบบประเมินผลการปฏิบัติงานลูกจ้างชั่วคราวและจ้างเหมาบริการ',
@@ -66,20 +51,100 @@ export const DEFAULT_SETTINGS: SystemSettings = {
  * 2. นางสาวอรวรรณ พงษ์ศิริ (orawan, EV-101) is strictly Evaluator / Deputy Director
  * 3. All users have synchronized avatar and avatarUrl fields
  */
+const OFFICIAL_AVATARS: Record<string, string> = {
+  user_admin_1: '/avatars/user_admin_1.jpg',
+  evaluator_director: '/avatars/evaluator_director.jpg',
+  evaluator_1: '/avatars/evaluator_1.jpg',
+  evaluator_2: '/avatars/evaluator_2.jpg',
+  evaluator_3: '/avatars/evaluator_3.jpg',
+  evaluator_4: '/avatars/evaluator_4.jpg',
+  evaluator_5: '/avatars/evaluator_5.jpg',
+  evaluator_6: '/avatars/evaluator_6.jpg',
+};
+
 export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasChanged: boolean } {
   let hasChanged = false;
   const userMap = new Map<string, User>();
 
   for (const raw of rawUsers) {
-    // Purge unwanted test user 'staff_gov_1' (นายณัฐพล บุญรักษา)
-    if (raw.id === 'staff_gov_1' || raw.name?.includes('ณัฐพล บุญรักษา')) {
-      hasChanged = true;
-      continue;
-    }
-
     let u = { ...raw };
 
-    // Normalize avatar and avatarUrl for all users without overwriting custom uploads
+    // 1. Identify and fix orawan (EV-101 / evaluator_1)
+    if (
+      u.id === 'evaluator_1' ||
+      u.username === 'orawan' ||
+      u.employeeCode === 'EV-101' ||
+      (u.name.includes('อรวรรณ') && u.role === 'admin')
+    ) {
+      if (
+        u.id !== 'evaluator_1' ||
+        u.role !== 'evaluator' ||
+        u.name !== 'นางสาวอรวรรณ พงษ์ศิริ' ||
+        u.username !== 'orawan' ||
+        u.employeeCode !== 'EV-101' ||
+        !u.position.includes('รองผู้อำนวยการ')
+      ) {
+        hasChanged = true;
+      }
+      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['evaluator_1'];
+      u = {
+        ...u,
+        id: 'evaluator_1',
+        name: 'นางสาวอรวรรณ พงษ์ศิริ',
+        username: 'orawan',
+        role: 'evaluator',
+        position: 'รองผู้อำนวยการสถานศึกษา (ประธานกรรมการ ชุดที่ 1)',
+        department: 'ฝ่ายบริหารงานวิชาการและบุคคล',
+        groupId: 'group_1',
+        employeeCode: 'EV-101',
+        email: u.email || 'orawan.p@chainat-special.ac.th',
+        phone: u.phone || '081-987-6543',
+        avatarUrl: existingAvatar,
+        avatar: existingAvatar,
+      };
+    }
+
+    // 2. Identify and fix rannaphat (EV-302 / user_admin_1)
+    else if (
+      u.id === 'user_admin_1' ||
+      u.username === 'rannaphat' ||
+      u.employeeCode === 'EV-302' ||
+      (u.name.includes('รัณย์ณภัทร') && u.role === 'admin')
+    ) {
+      if (
+        u.id !== 'user_admin_1' ||
+        u.role !== 'admin' ||
+        u.name !== 'นางสาวรัณย์ณภัทร มากุญชร' ||
+        u.username !== 'rannaphat' ||
+        u.employeeCode !== 'EV-302'
+      ) {
+        hasChanged = true;
+      }
+      const existingAvatar = u.avatarUrl || u.avatar || OFFICIAL_AVATARS['user_admin_1'];
+      u = {
+        ...u,
+        id: 'user_admin_1',
+        name: 'นางสาวรัณย์ณภัทร มากุญชร',
+        username: 'rannaphat',
+        role: 'admin',
+        position: 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)',
+        department: 'กลุ่มงานทะเบียนและประเมินผล',
+        employeeCode: 'EV-302',
+        email: u.email || 'rannaphat.m@chainat-special.ac.th',
+        phone: u.phone || '087-321-0987',
+        avatarUrl: existingAvatar,
+        avatar: existingAvatar,
+      };
+    }
+
+    // 3. Set default official photo only if user has no avatar set
+    if (OFFICIAL_AVATARS[u.id] && !u.avatarUrl && !u.avatar) {
+      u.avatarUrl = OFFICIAL_AVATARS[u.id];
+      u.avatar = OFFICIAL_AVATARS[u.id];
+      hasChanged = true;
+    }
+
+    // 4. Normalize avatar and avatarUrl for all users
     if (u.avatar && !u.avatarUrl) {
       u.avatarUrl = u.avatar;
       hasChanged = true;
@@ -92,17 +157,18 @@ export function sanitizeAndFixUsers(rawUsers: User[]): { sanitized: User[]; hasC
     userMap.set(u.id, u);
   }
 
+  // Ensure evaluator_1 and user_admin_1 exist in map
+  if (!userMap.has('evaluator_1')) {
+    userMap.set('evaluator_1', INITIAL_USERS.find((u) => u.id === 'evaluator_1')!);
+    hasChanged = true;
+  }
+  if (!userMap.has('user_admin_1')) {
+    userMap.set('user_admin_1', INITIAL_USERS.find((u) => u.id === 'user_admin_1')!);
+    hasChanged = true;
+  }
+
   const sanitized = Array.from(userMap.values());
   return { sanitized, hasChanged };
-}
-
-export interface RestoreOptions {
-  restoreUsersAndGroups?: boolean;
-  restoreSubmissions?: boolean;
-  restoreForms?: boolean;
-  restoreSettings?: boolean;
-  restoreThresholds?: boolean;
-  restoreTargetGroups?: boolean;
 }
 
 interface AppContextType {
@@ -178,30 +244,6 @@ interface AppContextType {
   // Global Settings
   updateGradeThresholds: (thresholds: GradeThreshold[]) => void;
   resetAllDataToDefault: () => void;
-
-  // Backup, Snapshots & Survey Archiving (ป้องกันข้อมูลรีเซ็ต & จัดเก็บข้อมูลสำรวจ)
-  localSnapshots: LocalSnapshotItem[];
-  createLocalSnapshot: (name: string, notes?: string, autoCreated?: boolean) => LocalSnapshotItem;
-  deleteLocalSnapshot: (id: string) => void;
-  restoreFromSnapshot: (snapshotId: string, options?: RestoreOptions) => Promise<{ success: boolean; message: string }>;
-  exportSystemBackup: (notes?: string) => SystemBackupData;
-  restoreSystemBackup: (backupData: SystemBackupData, options?: RestoreOptions) => Promise<{ success: boolean; message: string }>;
-  downloadBackupFile: (notes?: string) => void;
-  downloadSurveyArchive: () => void;
-  clearAuditLogs: () => void;
-  logAudit: (
-    action: string,
-    details: string,
-    options?: {
-      category?: AuditActionCategory;
-      targetUserId?: string;
-      targetUserName?: string;
-      previousValue?: string;
-      newValue?: string;
-      status?: 'SUCCESS' | 'WARNING' | 'ERROR';
-      userRole?: string;
-    }
-  ) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -218,7 +260,6 @@ const STORAGE_KEYS = {
   AUDIT_LOGS: 'pes_audit_logs_v9',
   SETTINGS: 'pes_settings_v9',
   FIREBASE_INITIALIZED: 'pes_firebase_initialized_v9',
-  SNAPSHOTS: 'pes_snapshots_v9',
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -345,23 +386,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             timestamp: new Date().toISOString(),
             userId: 'user_admin_1',
             userName: 'นายปรัชญา สมณะช้างเผือก',
-            userRole: 'admin',
-            category: 'SYSTEM',
             action: 'INITIALIZE_SYSTEM',
             details: 'คำสั่งโรงเรียนศึกษาพิเศษชัยนาท ที่ 251/2569 แต่งตั้งคณะกรรมการประเมินผลการปฏิบัติงาน ปีงบประมาณ 2569 ตำแหน่ง ครูผู้ช่วย (ลูกจ้างชั่วคราว)',
-            status: 'SUCCESS',
           },
         ];
   });
-
-  // 8. Local Snapshots (จุดสำรองข้อมูลในเครื่องเพื่อกันข้อมูลรีเซ็ต)
-  const [localSnapshots, setLocalSnapshots] = useState<LocalSnapshotItem[]>(() => {
-    return loadLocalSnapshots();
-  });
-
-  useEffect(() => {
-    saveLocalSnapshots(localSnapshots);
-  }, [localSnapshots]);
 
   // Active View & Filters
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -387,10 +416,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const remoteUsers = await FirebaseService.getUsers();
         const remoteSettings = await FirebaseService.getSystemSettings();
 
-        // Only seed if Firestore is completely brand new and empty (no settings and 0 users)
-        // CRITICAL: NEVER overwrite Firestore if users or settings already exist!
-        if (!remoteSettings && (!remoteUsers || remoteUsers.length === 0)) {
-          console.log('Fresh Firestore detected. Seeding baseline initial dataset...');
+        // If Firestore is empty or has an older partial dataset (< 30 staff members)
+        if (!remoteSettings || !remoteUsers || remoteUsers.length < 30) {
+          console.log('Syncing and seeding complete initial dataset (30 evaluatees + committees) to Firebase Firestore...');
           await FirebaseService.seedInitialData(
             INITIAL_USERS,
             INITIAL_COMMITTEE_GROUPS,
@@ -400,6 +428,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             GRADE_THRESHOLDS,
             INITIAL_TARGET_POSITION_GROUPS
           );
+        } else {
+          // Check if remote roles need synchronization for Pratchya and Rannaphat
+          const pratchyaRemote = remoteUsers.find((u) => u.name.includes('ปรัชญา'));
+          const rannaphatRemote = remoteUsers.find((u) => u.name.includes('รัณย์ณภัทร'));
+          if ((pratchyaRemote && pratchyaRemote.role === 'admin') || (rannaphatRemote && rannaphatRemote.role !== 'admin')) {
+            console.log('Synchronizing swapped roles to Firebase Firestore...');
+            if (pratchyaRemote) {
+              await FirebaseService.saveUser({
+                ...pratchyaRemote,
+                role: 'evaluator',
+                position: 'ผู้อำนวยการชำนาญการพิเศษ (ประธานกรรมการอำนวยการ / คณะกรรมการ)',
+                avatarUrl: OFFICIAL_AVATARS['evaluator_director'],
+                avatar: OFFICIAL_AVATARS['evaluator_director'],
+              });
+            }
+            if (rannaphatRemote) {
+              await FirebaseService.saveUser({
+                ...rannaphatRemote,
+                role: 'admin',
+                position: 'ครูชำนาญการ (ผู้ดูแลระบบ / Admin & กรรมการลงทะเบียนและรวบรวมคะแนน)',
+                avatarUrl: OFFICIAL_AVATARS['user_admin_1'],
+                avatar: OFFICIAL_AVATARS['user_admin_1'],
+              });
+            }
+          }
+
+          // Check if any committee or admin needs official avatar default on Firestore if empty
+          for (const remoteUser of remoteUsers) {
+            if (OFFICIAL_AVATARS[remoteUser.id] && !remoteUser.avatarUrl && !remoteUser.avatar) {
+              console.log(`Setting default official avatar for ${remoteUser.name} on Firestore...`);
+              await FirebaseService.saveUser({
+                ...remoteUser,
+                avatarUrl: OFFICIAL_AVATARS[remoteUser.id],
+                avatar: OFFICIAL_AVATARS[remoteUser.id],
+              });
+            }
+          }
         }
 
         // Setup real-time listeners for all models across all devices (PC, Android, iOS)
@@ -418,11 +483,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         unsubGroups = FirebaseService.listenCommitteeGroups((remoteGroups) => {
           if (remoteGroups && remoteGroups.length > 0) {
-            const cleaned = remoteGroups.map((g) => ({
-              ...g,
-              assignedEvaluateeIds: (g.assignedEvaluateeIds || []).filter((id) => id !== 'staff_gov_1'),
-            }));
-            setCommitteeGroups(cleaned);
+            setCommitteeGroups(remoteGroups);
           }
         });
 
@@ -614,55 +675,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAggregatedResults(results);
   }, [users, committeeGroups, formTemplates, submissions, gradeThresholds]);
 
-  // Logger helper with enriched category and permission metadata
-  const logAudit = (
-    action: string,
-    details: string,
-    options?: {
-      category?: AuditActionCategory;
-      targetUserId?: string;
-      targetUserName?: string;
-      previousValue?: string;
-      newValue?: string;
-      status?: 'SUCCESS' | 'WARNING' | 'ERROR';
-      userRole?: string;
-    }
-  ) => {
-    // Determine category automatically if not provided
-    let category: AuditActionCategory = options?.category || 'SYSTEM';
-    if (!options?.category) {
-      if (action.includes('LOGIN') || action.includes('LOGOUT') || action.includes('AUTH') || action.includes('PASSWORD')) {
-        category = 'AUTH';
-      } else if (action.includes('ROLE') || action.includes('PERMISSION') || action.includes('SWITCH')) {
-        category = 'PERMISSION';
-      } else if (action.includes('EVALUATION') || action.includes('SUBMISSION')) {
-        category = 'EVALUATION';
-      } else if (action.includes('USER')) {
-        category = 'USER_MANAGEMENT';
-      } else if (action.includes('COMMITTEE') || action.includes('GROUP')) {
-        category = 'COMMITTEE';
-      } else if (action.includes('BACKUP') || action.includes('SNAPSHOT') || action.includes('RESTORE') || action.includes('SURVEY')) {
-        category = 'BACKUP';
-      }
-    }
-
+  // Logger helper
+  const logAudit = (action: string, details: string) => {
     const newLog: AuditLog = {
-      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       timestamp: new Date().toISOString(),
       userId: currentUser?.id || 'guest',
-      userName: currentUser?.name || 'ผู้ใช้งานระบบ',
-      userRole: options?.userRole || currentUser?.role || 'guest',
+      userName: currentUser?.name || 'ผู้ใช้งาน',
       action,
-      category,
       details,
-      targetUserId: options?.targetUserId,
-      targetUserName: options?.targetUserName,
-      previousValue: options?.previousValue,
-      newValue: options?.newValue,
-      status: options?.status || 'SUCCESS',
-      deviceInfo: typeof navigator !== 'undefined' ? `${navigator.platform || ''}` : 'Web Client',
     };
-    setAuditLogs((prev) => [newLog, ...prev.slice(0, 199)]);
+    setAuditLogs((prev) => [newLog, ...prev.slice(0, 99)]);
     FirebaseService.addAuditLog(newLog).catch(console.error);
   };
 
@@ -679,10 +702,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         gradeThresholds,
         targetPositionGroups
       );
-      logAudit('FIREBASE_SYNC_ALL', 'ซิงค์ข้อมูลทั้งหมดขึ้นฐานข้อมูล Firebase สำเร็จ', {
-        category: 'SYSTEM',
-        status: 'SUCCESS',
-      });
+      logAudit('FIREBASE_SYNC_ALL', 'ซิงค์ข้อมูลทั้งหมดขึ้นฐานข้อมูล Firebase สำเร็จ');
       setIsFirebaseConnected(true);
     } catch (e) {
       console.error('Firebase manual sync error:', e);
@@ -706,41 +726,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (!foundUser) {
-      logAudit('LOGIN_FAILED', `พยายามเข้าสู่ระบบแต่ไม่พบบัญชี: "${username}"`, {
-        category: 'AUTH',
-        status: 'WARNING',
-      });
       return { success: false, message: 'ไม่พบบัญชีผู้ใช้งานนี้ในระบบ' };
     }
 
     if (foundUser.password && foundUser.password !== password) {
-      logAudit('LOGIN_FAILED', `รหัสผ่านไม่ถูกต้องสำหรับบัญชี: ${foundUser.name} (${foundUser.id})`, {
-        category: 'AUTH',
-        targetUserId: foundUser.id,
-        targetUserName: foundUser.name,
-        status: 'WARNING',
-      });
       return { success: false, message: 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' };
     }
 
     setCurrentUser(foundUser);
     setIsAuthenticated(true);
-    const roleLabels: Record<UserRole, string> = {
-      admin: 'ผู้บริหาร / แอดมิน (Admin)',
-      evaluator: 'คณะกรรมการประเมิน (Evaluator)',
-      staff: 'ผู้รับการประเมิน (Staff)',
-    };
-    logAudit(
-      'USER_LOGIN',
-      `เข้าสู่ระบบสำเร็จในฐานะ: ${foundUser.name} (${foundUser.position}) [สิทธิ์: ${roleLabels[foundUser.role]}]`,
-      {
-        category: 'AUTH',
-        targetUserId: foundUser.id,
-        targetUserName: foundUser.name,
-        userRole: foundUser.role,
-        status: 'SUCCESS',
-      }
-    );
+    logAudit('USER_LOGIN', `เข้าสู่ระบบสำเร็จในฐานะ ${foundUser.name} (${foundUser.position})`);
 
     if (foundUser.role === 'staff') {
       setActiveView('my_evaluation');
@@ -753,26 +748,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginAsUser = (user: User) => {
-    const prevUser = currentUser;
     setCurrentUser(user);
     setIsAuthenticated(true);
-    const roleLabels: Record<UserRole, string> = {
-      admin: 'ผู้บริหาร / แอดมิน (Admin)',
-      evaluator: 'คณะกรรมการประเมิน (Evaluator)',
-      staff: 'ผู้รับการประเมิน (Staff)',
-    };
-    logAudit(
-      'SWITCH_USER_PERMISSION',
-      `สลับสิทธิ์การใช้งานเป็น: "${user.name}" (บทบาท: ${roleLabels[user.role]}) โดยผู้ใช้เดิม: "${prevUser?.name || 'ระบบ'}"`,
-      {
-        category: 'PERMISSION',
-        targetUserId: user.id,
-        targetUserName: user.name,
-        previousValue: prevUser?.role,
-        newValue: user.role,
-        status: 'SUCCESS',
-      }
-    );
+    logAudit('DEMO_SWITCH_USER', `สลับตัวตนทดสอบ (Demo) เป็น ${user.name} (${user.position})`);
 
     if (user.role === 'staff') {
       setActiveView('my_evaluation');
@@ -783,10 +761,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
-    logAudit('USER_LOGOUT', `ออกจากระบบ: ${currentUser.name} (${currentUser.position})`, {
-      category: 'AUTH',
-      status: 'SUCCESS',
-    });
+    logAudit('USER_LOGOUT', `ออกจากระบบ: ${currentUser.name}`);
     setIsAuthenticated(false);
   };
 
@@ -831,13 +806,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     logAudit(
       'SUBMIT_EVALUATION',
-      `${existing ? 'แก้ไขผลการประเมิน' : 'ส่งผลการประเมิน'}ให้แก่ ${data.evaluateeName} (${data.evaluateePosition}) ได้คะแนน ${data.percentage}% [${data.grade}]`,
-      {
-        category: 'EVALUATION',
-        targetUserId: data.evaluateeId,
-        targetUserName: data.evaluateeName,
-        status: 'SUCCESS',
-      }
+      `${existing ? 'แก้ไขผลการประเมิน' : 'ส่งผลการประเมิน'}ให้แก่ ${data.evaluateeName} (${data.evaluateePosition}) ได้คะแนน ${data.percentage}% [${data.grade}]`
     );
 
     return newSubmission;
@@ -1016,27 +985,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setUsers((prev) => [newUser, ...prev]);
     FirebaseService.saveUser(newUser).catch(console.error);
-    const roleLabels: Record<UserRole, string> = {
-      admin: 'ผู้บริหาร / แอดมิน (Admin)',
-      evaluator: 'คณะกรรมการประเมิน (Evaluator)',
-      staff: 'ผู้รับการประเมิน (Staff)',
-    };
-    logAudit(
-      'CREATE_USER_WITH_PERMISSION',
-      `เพิ่มผู้ใช้งานใหม่และกำหนดสิทธิ์: "${newUser.name}" (${newUser.position}) สิทธิ์: ${roleLabels[newUser.role]}`,
-      {
-        category: 'PERMISSION',
-        targetUserId: newUser.id,
-        targetUserName: newUser.name,
-        newValue: newUser.role,
-        status: 'SUCCESS',
-      }
-    );
+    logAudit('CREATE_USER', `เพิ่มผู้ใช้งานใหม่: ${newUser.name} (${newUser.position}) [${newUser.role}]`);
     return newUser;
   };
 
   const updateUser = (user: User) => {
-    const prevUser = users.find((u) => u.id === user.id);
     const avatarValue = user.avatar || user.avatarUrl || undefined;
     const synchronizedUser: User = {
       ...user,
@@ -1048,32 +1001,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(synchronizedUser);
     }
     FirebaseService.saveUser(synchronizedUser).catch(console.error);
-
-    if (prevUser && prevUser.role !== synchronizedUser.role) {
-      const roleLabels: Record<UserRole, string> = {
-        admin: 'ผู้บริหาร / แอดมิน (Admin)',
-        evaluator: 'คณะกรรมการประเมิน (Evaluator)',
-        staff: 'ผู้รับการประเมิน (Staff)',
-      };
-      logAudit(
-        'CHANGE_USER_ROLE_AND_PERMISSION',
-        `ปรับเปลี่ยนสิทธิ์และบทบาทผู้ใช้: "${synchronizedUser.name}" จากสิทธิ์ "${roleLabels[prevUser.role]}" เป็นสิทธิ์ "${roleLabels[synchronizedUser.role]}"`,
-        {
-          category: 'PERMISSION',
-          targetUserId: synchronizedUser.id,
-          targetUserName: synchronizedUser.name,
-          previousValue: prevUser.role,
-          newValue: synchronizedUser.role,
-          status: 'SUCCESS',
-        }
-      );
-    } else {
-      logAudit('UPDATE_USER', `แก้ไขข้อมูลผู้ใช้งาน: ${synchronizedUser.name} (${synchronizedUser.position})`, {
-        category: 'USER_MANAGEMENT',
-        targetUserId: synchronizedUser.id,
-        targetUserName: synchronizedUser.name,
-      });
-    }
+    logAudit('UPDATE_USER', `แก้ไขข้อมูลผู้ใช้งาน: ${synchronizedUser.name} (${synchronizedUser.position})`);
   };
 
   const updateUserProfile = (userId: string, updates: Partial<User>) => {
@@ -1106,31 +1034,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       FirebaseService.saveSystemSettings(updated).catch(console.error);
       return updated;
     });
-    logAudit('UPDATE_SYSTEM_SETTINGS', `แก้ไขการตั้งค่าระบบ: ชื่อแอพ/ชื่อโรงเรียน/โลโก้/โหมดทดสอบ`, {
-      category: 'SYSTEM',
-    });
+    logAudit('UPDATE_SYSTEM_SETTINGS', `แก้ไขการตั้งค่าระบบ: ชื่อแอพ/ชื่อโรงเรียน/โลโก้/โหมดทดสอบ`);
   };
 
   const resetSystemSettings = () => {
     setSystemSettings(DEFAULT_SETTINGS);
     FirebaseService.saveSystemSettings(DEFAULT_SETTINGS).catch(console.error);
-    logAudit('RESET_SYSTEM_SETTINGS', 'คืนค่าการตั้งค่าระบบเป็นค่าเริ่มต้น', {
-      category: 'SYSTEM',
-      status: 'WARNING',
-    });
+    logAudit('RESET_SYSTEM_SETTINGS', 'คืนค่าการตั้งค่าระบบเป็นค่าเริ่มต้น');
   };
 
   const deleteUser = (userId: string) => {
     const userToDelete = users.find((u) => u.id === userId);
     setUsers((prev) => prev.filter((u) => u.id !== userId));
     FirebaseService.deleteUser(userId).catch(console.error);
-    logAudit('DELETE_USER_PERMISSION', `ลบผู้ใช้งานและเพิกถอนสิทธิ์: "${userToDelete?.name || userId}" (ตำแหน่ง: ${userToDelete?.position || '-'})`, {
-      category: 'PERMISSION',
-      targetUserId: userId,
-      targetUserName: userToDelete?.name,
-      previousValue: userToDelete?.role,
-      status: 'SUCCESS',
-    });
+    logAudit('DELETE_USER', `ลบผู้ใช้งาน: ${userToDelete?.name || userId}`);
   };
 
   const resetUserPassword = (userId: string, newPassword: string) => {
@@ -1145,11 +1062,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
     const user = users.find((u) => u.id === userId);
-    logAudit('RESET_USER_PASSWORD', `รีเซ็ตรหัสผ่านของผู้ใช้งาน: ${user?.name || userId}`, {
-      category: 'AUTH',
-      targetUserId: userId,
-      targetUserName: user?.name,
-    });
+    logAudit('RESET_USER_PASSWORD', `รีเซ็ตรหัสผ่านของผู้ใช้งาน: ${user?.name || userId}`);
   };
 
   // Form Management CRUD
@@ -1193,268 +1106,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     logAudit('UPDATE_THRESHOLDS', 'ปรับปรุงเกณฑ์การตัดระดับผลการประเมิน (5 ระดับ)');
   };
 
-  // =========================================================================
-  // Backup, Snapshots, Survey Archiving & Reset Protection
-  // =========================================================================
-
-  const createLocalSnapshot = (name: string, notes?: string, autoCreated: boolean = false): LocalSnapshotItem => {
-    const backupData = buildSystemBackupData(
-      systemSettings,
-      gradeThresholds,
-      targetPositionGroups,
-      users,
-      committeeGroups,
-      formTemplates,
-      submissions,
-      auditLogs,
-      {
-        id: currentUser?.id || 'system',
-        name: currentUser?.name || 'ระบบอัตโนมัติ',
-        role: currentUser?.role || 'admin',
-        position: currentUser?.position || 'ผู้ดูแลระบบ',
-      },
-      notes
-    );
-
-    const snapshotItem: LocalSnapshotItem = {
-      id: 'snap_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-      name: name || `สำรองข้อมูล ${new Date().toLocaleString('th-TH')}`,
-      createdAt: new Date().toISOString(),
-      createdBy: currentUser?.name || 'ระบบอัตโนมัติ',
-      creatorRole: currentUser?.role || 'admin',
-      notes,
-      autoCreated,
-      totalUsers: users.length,
-      totalSubmissions: submissions.length,
-      data: backupData,
-      sizeBytes: JSON.stringify(backupData).length,
-    };
-
-    setLocalSnapshots((prev) => {
-      const updated = [snapshotItem, ...prev.slice(0, MAX_SNAPSHOTS - 1)];
-      saveLocalSnapshots(updated);
-      return updated;
-    });
-
-    logAudit(
-      'CREATE_SNAPSHOT',
-      `สร้างจุดสำรองข้อมูลในเครื่อง: "${snapshotItem.name}" (${users.length} ผู้ใช้, ${submissions.length} ผลประเมิน)`,
-      {
-        category: 'BACKUP',
-        status: 'SUCCESS',
-      }
-    );
-    return snapshotItem;
-  };
-
-  const deleteLocalSnapshot = (id: string) => {
-    const target = localSnapshots.find((s) => s.id === id);
-    setLocalSnapshots((prev) => {
-      const updated = prev.filter((s) => s.id !== id);
-      saveLocalSnapshots(updated);
-      return updated;
-    });
-    logAudit('DELETE_SNAPSHOT', `ลบจุดสำรองข้อมูล: "${target?.name || id}"`, {
-      category: 'BACKUP',
-      status: 'SUCCESS',
-    });
-  };
-
-  const exportSystemBackup = (notes?: string): SystemBackupData => {
-    return buildSystemBackupData(
-      systemSettings,
-      gradeThresholds,
-      targetPositionGroups,
-      users,
-      committeeGroups,
-      formTemplates,
-      submissions,
-      auditLogs,
-      {
-        id: currentUser.id,
-        name: currentUser.name,
-        role: currentUser.role,
-        position: currentUser.position,
-      },
-      notes
-    );
-  };
-
-  const restoreSystemBackup = async (
-    backupData: SystemBackupData,
-    options?: RestoreOptions
-  ): Promise<{ success: boolean; message: string }> => {
-    const opts = {
-      restoreUsersAndGroups: true,
-      restoreSubmissions: true,
-      restoreForms: true,
-      restoreSettings: true,
-      restoreThresholds: true,
-      restoreTargetGroups: true,
-      ...options,
-    };
-
-    try {
-      // 1. Automatically save a safety snapshot before restoring!
-      createLocalSnapshot(
-        `จุดกู้คืนฉุกเฉิน (ก่อนกู้คืน ${new Date().toLocaleTimeString('th-TH')})`,
-        'ระบบสร้างอัตโนมัติก่อนกู้คืนข้อมูล เพื่อความปลอดภัยสูงสุด',
-        true
-      );
-
-      // 2. Restore Users & Groups
-      if (opts.restoreUsersAndGroups) {
-        if (Array.isArray(backupData.users) && backupData.users.length > 0) {
-          const { sanitized } = sanitizeAndFixUsers(backupData.users);
-          setUsers(sanitized);
-          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(sanitized));
-        }
-        if (Array.isArray(backupData.committeeGroups)) {
-          setCommitteeGroups(backupData.committeeGroups);
-          localStorage.setItem(STORAGE_KEYS.GROUPS, JSON.stringify(backupData.committeeGroups));
-        }
-      }
-
-      // 3. Restore Target Position Groups
-      if (opts.restoreTargetGroups && Array.isArray(backupData.targetPositionGroups)) {
-        setTargetPositionGroups(backupData.targetPositionGroups);
-        localStorage.setItem(STORAGE_KEYS.TARGET_GROUPS, JSON.stringify(backupData.targetPositionGroups));
-      }
-
-      // 4. Restore Form Templates
-      if (opts.restoreForms && Array.isArray(backupData.formTemplates) && backupData.formTemplates.length > 0) {
-        setFormTemplates(backupData.formTemplates);
-        localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(backupData.formTemplates));
-      }
-
-      // 5. Restore Submissions / Survey Data
-      if (opts.restoreSubmissions && Array.isArray(backupData.submissions)) {
-        setSubmissions(backupData.submissions);
-        localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(backupData.submissions));
-      }
-
-      // 6. Restore Settings & Thresholds
-      if (opts.restoreSettings && backupData.systemSettings) {
-        setSystemSettings(backupData.systemSettings);
-        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(backupData.systemSettings));
-      }
-      if (opts.restoreThresholds && Array.isArray(backupData.gradeThresholds)) {
-        setGradeThresholds(backupData.gradeThresholds);
-        localStorage.setItem(STORAGE_KEYS.THRESHOLDS, JSON.stringify(backupData.gradeThresholds));
-      }
-
-      // Sync restored state to Firebase if connected
-      try {
-        await FirebaseService.seedInitialData(
-          opts.restoreUsersAndGroups ? (backupData.users || users) : users,
-          opts.restoreUsersAndGroups ? (backupData.committeeGroups || committeeGroups) : committeeGroups,
-          opts.restoreForms ? (backupData.formTemplates || formTemplates) : formTemplates,
-          opts.restoreSubmissions ? (backupData.submissions || submissions) : submissions,
-          opts.restoreSettings ? (backupData.systemSettings || systemSettings) : systemSettings,
-          opts.restoreThresholds ? (backupData.gradeThresholds || gradeThresholds) : gradeThresholds,
-          opts.restoreTargetGroups ? (backupData.targetPositionGroups || targetPositionGroups) : targetPositionGroups
-        );
-      } catch (err) {
-        console.warn('Firebase sync warning during restore (local data restored successfully):', err);
-      }
-
-      logAudit(
-        'RESTORE_SYSTEM_BACKUP',
-        `กู้คืนข้อมูลระบบสำเร็จ: ผู้ใช้ ${backupData.users?.length || 0} รายการ, ผลประเมิน/แบบสำรวจ ${backupData.submissions?.length || 0} รายการ`,
-        {
-          category: 'BACKUP',
-          status: 'SUCCESS',
-        }
-      );
-
-      return { success: true, message: 'กู้คืนข้อมูลระบบสำเร็จเรียบร้อยแล้ว' };
-    } catch (err: any) {
-      console.error('Error during system restore:', err);
-      logAudit('RESTORE_SYSTEM_BACKUP_FAILED', `กู้คืนข้อมูลล้มเหลว: ${err?.message || 'Unknown error'}`, {
-        category: 'BACKUP',
-        status: 'ERROR',
-      });
-      return { success: false, message: 'เกิดข้อผิดพลาดในการกู้คืนข้อมูล: ' + (err?.message || '') };
-    }
-  };
-
-  const restoreFromSnapshot = async (
-    snapshotId: string,
-    options?: RestoreOptions
-  ): Promise<{ success: boolean; message: string }> => {
-    const snapshot = localSnapshots.find((s) => s.id === snapshotId);
-    if (!snapshot || !snapshot.data) {
-      return { success: false, message: 'ไม่พบข้อมูลของจุดสำรองนี้ในระบบ' };
-    }
-    return restoreSystemBackup(snapshot.data, options);
-  };
-
-  const downloadBackupFile = (notes?: string) => {
-    const backupData = exportSystemBackup(notes);
-    const dateStr = new Date().toISOString().split('T')[0];
-    const filename = `pes_backup_${systemSettings.academicYear}_${dateStr}.json`;
-    downloadJsonFile(backupData, filename);
-    logAudit('EXPORT_BACKUP_FILE', `ดาวน์โหลดไฟล์สำรองข้อมูลทั้งระบบ: ${filename}`, {
-      category: 'BACKUP',
-      status: 'SUCCESS',
-    });
-  };
-
-  const downloadSurveyArchive = () => {
-    const dateStr = new Date().toISOString().split('T')[0];
-    // 1. Download Excel/CSV with UTF-8 BOM
-    const csvContent = generateSurveyCsv(aggregatedResults, submissions, systemSettings);
-    downloadCsvFile(csvContent, `รายงานผลสำรวจและประเมิน_${systemSettings.academicYear}_${dateStr}.csv`);
-
-    // 2. Download Complete Survey JSON archive
-    const surveyJsonData = {
-      title: `ชุดข้อมูลสำรวจและประเมินผลการปฏิบัติงาน ประจำปีงบประมาณ ${systemSettings.academicYear}`,
-      schoolName: systemSettings.schoolName,
-      schoolAffiliation: systemSettings.schoolAffiliation,
-      evaluationRound: systemSettings.evaluationRound,
-      exportedAt: new Date().toISOString(),
-      exportedBy: {
-        id: currentUser.id,
-        name: currentUser.name,
-        role: currentUser.role,
-        position: currentUser.position,
-      },
-      totalEvaluatees: aggregatedResults.length,
-      totalSubmissions: submissions.length,
-      aggregatedResults,
-      submissions,
-    };
-    downloadJsonFile(surveyJsonData, `แฟ้มข้อมูลสำรวจ_${systemSettings.academicYear}_${dateStr}.json`);
-
-    logAudit('DOWNLOAD_SURVEY_ARCHIVE', `ดาวน์โหลดแฟ้มจัดเก็บข้อมูลสำรวจและประเมินผล ประจำปีงบประมาณ ${systemSettings.academicYear} (CSV & JSON)`, {
-      category: 'BACKUP',
-      status: 'SUCCESS',
-    });
-  };
-
-  const clearAuditLogs = () => {
-    const clearLog: AuditLog = {
-      id: 'log_' + Date.now(),
-      timestamp: new Date().toISOString(),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userRole: currentUser.role,
-      action: 'CLEAR_AUDIT_LOGS',
-      category: 'BACKUP',
-      details: 'ล้างประวัติการใช้งานระบบทั้งหมด และเริ่มต้นเก็บบันทึกใหม่',
-      status: 'SUCCESS',
-    };
-    setAuditLogs([clearLog]);
-    localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify([clearLog]));
-  };
-
   const resetAllDataToDefault = () => {
-    // 1. Automatically save a snapshot of current data before resetting!
-    createLocalSnapshot(
-      `จุดสำรองก่อนรีเซ็ตระบบ (${new Date().toLocaleTimeString('th-TH')})`,
-      'ระบบสำรองข้อมูลอัตโนมัติก่อนล้างข้อมูลกลับสู่ค่าเริ่มต้นโรงงาน เพื่อป้องกันข้อมูลสูญหาย',
-      true
-    );
     setUsers(INITIAL_USERS);
     setCurrentUser(INITIAL_USERS[1]);
     setIsAuthenticated(true);
@@ -1465,22 +1117,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGradeThresholds(GRADE_THRESHOLDS);
     localStorage.clear();
     syncAllToFirebase().catch(console.error);
-    logAudit('RESET_SYSTEM', 'รีเซ็ตข้อมูลระบบกลับสู่ค่าเริ่มต้นจากโรงงาน (ได้สร้างจุดสำรองข้อมูลความปลอดภัยไว้แล้ว)', {
-      category: 'SYSTEM',
-      status: 'WARNING',
-    });
+    logAudit('RESET_SYSTEM', 'รีเซ็ตข้อมูลระบบกลับสู่ค่าเริ่มต้นจากโรงงาน');
   };
-
-  // Daily automatic snapshot check
-  useEffect(() => {
-    if (users.length > 0) {
-      const today = new Date().toISOString().split('T')[0];
-      const existingAuto = localSnapshots.find((s) => s.autoCreated && s.createdAt.startsWith(today));
-      if (!existingAuto) {
-        createLocalSnapshot(`สำรองอัตโนมัติประจำวัน (${today})`, 'ระบบสำรองข้อมูลอัตโนมัติเพื่อป้องกันข้อมูลรีเซ็ต', true);
-      }
-    }
-  }, [users.length]);
 
   return (
     <AppContext.Provider
@@ -1536,16 +1174,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetFormTemplatesToDefault,
         updateGradeThresholds,
         resetAllDataToDefault,
-        localSnapshots,
-        createLocalSnapshot,
-        deleteLocalSnapshot,
-        restoreFromSnapshot,
-        exportSystemBackup,
-        restoreSystemBackup,
-        downloadBackupFile,
-        downloadSurveyArchive,
-        clearAuditLogs,
-        logAudit,
       }}
     >
       {children}

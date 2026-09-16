@@ -12,8 +12,6 @@ import { UserManagementView } from './components/UserManagementView';
 import { FormManagementView } from './components/FormManagementView';
 import { StaffPortalView } from './components/StaffPortalView';
 import { SystemSettingsView } from './components/SystemSettingsView';
-import { BackupAndRestoreCenter } from './components/BackupAndRestoreCenter';
-import { AuditLogsView } from './components/AuditLogsView';
 import { AggregatedResult } from './types';
 import { ShieldCheck, Award } from 'lucide-react';
 
@@ -54,10 +52,6 @@ const MainAppContent: React.FC = () => {
 
         {activeView === 'settings' && <SystemSettingsView />}
 
-        {activeView === 'backup' && <BackupAndRestoreCenter />}
-
-        {activeView === 'audit_logs' && <AuditLogsView />}
-
         {activeView === 'schema' && <DatabaseSchemaModal />}
       </main>
 
@@ -81,11 +75,9 @@ const MainAppContent: React.FC = () => {
               {systemSettings.appName} ({systemSettings.appShortName})
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-400 whitespace-nowrap overflow-x-auto text-[11px] sm:text-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span className="whitespace-nowrap">{systemSettings.schoolName}</span>
-            <span className="whitespace-nowrap">•</span>
-            <span className="whitespace-nowrap">({systemSettings.schoolAffiliation})</span>
+          <div className="flex items-center gap-1.5 text-slate-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{systemSettings.schoolName} • {systemSettings.schoolAffiliation}</span>
           </div>
         </div>
       </footer>

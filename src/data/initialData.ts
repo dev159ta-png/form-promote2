@@ -81,6 +81,8 @@ export const INITIAL_USERS: User[] = [
     email: 'rannaphat.m@chainat-special.ac.th',
     phone: '087-321-0987',
     employeeCode: 'EV-302',
+    avatarUrl: '/avatars/user_admin_1.jpg',
+    avatar: '/avatars/user_admin_1.jpg',
   },
 
   // 2. ผู้อำนวยการ / คณะกรรมการอำนวยการ (Evaluator)
@@ -95,6 +97,8 @@ export const INITIAL_USERS: User[] = [
     email: 'director@chainat-special.ac.th',
     phone: '056-411-xxx',
     employeeCode: 'DIR-001',
+    avatarUrl: '/avatars/evaluator_director.jpg',
+    avatar: '/avatars/evaluator_director.jpg',
   },
 
   // 3. คณะกรรมการประเมินผลการปฏิบัติงาน ชุดที่ 1
@@ -111,6 +115,8 @@ export const INITIAL_USERS: User[] = [
     email: 'orawan.p@chainat-special.ac.th',
     phone: '081-987-6543',
     employeeCode: 'EV-101',
+    avatarUrl: '/avatars/evaluator_1.jpg',
+    avatar: '/avatars/evaluator_1.jpg',
   },
   {
     id: 'evaluator_2',
@@ -124,6 +130,8 @@ export const INITIAL_USERS: User[] = [
     email: 'panida.s@chainat-special.ac.th',
     phone: '082-876-5432',
     employeeCode: 'EV-102',
+    avatarUrl: '/avatars/evaluator_2.jpg',
+    avatar: '/avatars/evaluator_2.jpg',
   },
   {
     id: 'evaluator_3',
@@ -137,6 +145,8 @@ export const INITIAL_USERS: User[] = [
     email: 'supawan.t@chainat-special.ac.th',
     phone: '083-765-4321',
     employeeCode: 'EV-103',
+    avatarUrl: '/avatars/evaluator_3.jpg',
+    avatar: '/avatars/evaluator_3.jpg',
   },
 
   // 4. คณะกรรมการประเมินผลการปฏิบัติงาน ชุดที่ 2
@@ -153,6 +163,8 @@ export const INITIAL_USERS: User[] = [
     email: 'nuchjarin.p@chainat-special.ac.th',
     phone: '084-654-3210',
     employeeCode: 'EV-201',
+    avatarUrl: '/avatars/evaluator_4.jpg',
+    avatar: '/avatars/evaluator_4.jpg',
   },
   {
     id: 'evaluator_5',
@@ -166,6 +178,8 @@ export const INITIAL_USERS: User[] = [
     email: 'rawiwan.d@chainat-special.ac.th',
     phone: '085-543-2109',
     employeeCode: 'EV-202',
+    avatarUrl: '/avatars/evaluator_5.jpg',
+    avatar: '/avatars/evaluator_5.jpg',
   },
   {
     id: 'evaluator_6',
@@ -179,6 +193,8 @@ export const INITIAL_USERS: User[] = [
     email: 'taratchaya.m@chainat-special.ac.th',
     phone: '086-432-1098',
     employeeCode: 'EV-203',
+    avatarUrl: '/avatars/evaluator_6.jpg',
+    avatar: '/avatars/evaluator_6.jpg',
   },
 
   // 5. ผู้รับการประเมิน (ลูกจ้างชั่วคราว ตำแหน่งครูผู้ช่วย 13 ท่าน และ จ้างเหมาบริการ 12 ตำแหน่ง)
@@ -547,6 +563,22 @@ export const INITIAL_USERS: User[] = [
     email: 'namoy.k@chainat-special.ac.th',
     employeeCode: 'S-067',
   },
+
+  // --- กลุ่มที่ 3: พนักงานราชการทั่วไป ตำแหน่ง ครูผู้สอน ---
+  {
+    id: 'staff_gov_1',
+    name: 'นายณัฐพล บุญรักษา',
+    username: 'nattapon',
+    password: 'password123',
+    position: 'พนักงานราชการทั่วไป ตำแหน่งครูผู้สอน',
+    positionGroup: 'government_employee_teacher',
+    formTemplateId: 'form_government_employee_teacher',
+    department: 'กลุ่มงานการศึกษาพิเศษและการจัดการเรียนรู้',
+    role: 'staff',
+    email: 'nattapon.b@chainat-special.ac.th',
+    employeeCode: 'G-001',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
+  },
 ];
 
 export const INITIAL_COMMITTEE_GROUPS: CommitteeGroup[] = [
@@ -609,7 +641,7 @@ export const INITIAL_COMMITTEE_GROUPS: CommitteeGroup[] = [
     description:
       'หน้าที่: ประเมินผลการปฏิบัติงานพนักงานราชการทั่วไป ตำแหน่งครูผู้สอน ตามสมรรถนะหลัก 5 ด้าน และสมรรถนะประจำสายงาน 2 ด้าน',
     evaluatorIds: ['evaluator_1', 'evaluator_director', 'evaluator_2'],
-    assignedEvaluateeIds: [],
+    assignedEvaluateeIds: ['staff_gov_1'],
     createdAt: '2026-08-17T08:30:00.000Z',
   },
 ];
@@ -688,10 +720,9 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางสาวอรวรรณ พงษ์ศิริ',
       supervisorPosition: 'รองผู้อำนวยการชำนาญการพิเศษ',
-      supervisorSignedAt: '2026-04-01T09:30:00.000Z',
+      supervisorSignedAt: '2026-09-16T09:30:00.000Z',
     },
-    submittedAt: '2026-04-01T09:30:00.000Z',
-    updatedAt: '2026-04-01T09:30:00.000Z',
+    submittedAt: '2026-09-16T09:30:00.000Z',
     isDraft: false,
     aiFeedback: {
       strengthsSummary: 'มีความเชี่ยวชาญการออกแบบการสอนสำหรับเด็กพิเศษและการปรับใช้สื่อดิจิทัล',
@@ -759,10 +790,9 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางพนิดา สมบูรณ์ชัย',
       supervisorPosition: 'ครูชำนาญการพิเศษ',
-      supervisorSignedAt: '2026-04-01T10:15:00.000Z',
+      supervisorSignedAt: '2026-09-16T10:15:00.000Z',
     },
-    submittedAt: '2026-04-01T10:15:00.000Z',
-    updatedAt: '2026-04-01T10:15:00.000Z',
+    submittedAt: '2026-09-16T10:15:00.000Z',
     isDraft: false,
   },
 
@@ -810,10 +840,9 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางสาวนุชจรินทร์ โพธิ์เงิน',
       supervisorPosition: 'รองผู้อำนวยการชำนาญการ',
-      supervisorSignedAt: '2026-04-01T11:00:00.000Z',
+      supervisorSignedAt: '2026-09-17T11:00:00.000Z',
     },
-    submittedAt: '2026-04-01T11:00:00.000Z',
-    updatedAt: '2026-04-01T11:00:00.000Z',
+    submittedAt: '2026-09-17T11:00:00.000Z',
     isDraft: false,
   },
 
@@ -858,8 +887,7 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
     recommendation: {
       decision: 'continue',
     },
-    submittedAt: '2026-04-01T11:30:00.000Z',
-    updatedAt: '2026-04-01T11:30:00.000Z',
+    submittedAt: '2026-09-17T11:30:00.000Z',
     isDraft: false,
   },
 
@@ -903,8 +931,7 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
     recommendation: {
       decision: 'continue',
     },
-    submittedAt: '2026-04-01T13:45:00.000Z',
-    updatedAt: '2026-04-01T13:45:00.000Z',
+    submittedAt: '2026-09-17T13:45:00.000Z',
     isDraft: false,
   },
 ];

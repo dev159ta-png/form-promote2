@@ -29,8 +29,6 @@ import {
   Lock,
   Cloud,
   RefreshCw,
-  ShieldCheck,
-  History,
 } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { LoginModal } from './LoginModal';
@@ -116,8 +114,6 @@ export const Navbar: React.FC = () => {
         { id: 'forms_admin', label: 'จัดการแบบฟอร์ม (14 ตำแหน่ง)', icon: FileEdit },
         { id: 'groups', label: 'จัดการกลุ่มกรรมการ', icon: Users },
         { id: 'reports', label: 'รายงาน & Export', icon: FileText },
-        { id: 'backup', label: 'สำรองข้อมูล & ป้องกันรีเซ็ต', icon: ShieldCheck },
-        { id: 'audit_logs', label: 'ประวัติการใช้งาน & สิทธิ์', icon: History },
         { id: 'settings', label: 'ตั้งค่าระบบ', icon: Settings },
         { id: 'schema', label: 'DB & ER Schema', icon: Database },
       ];
@@ -315,45 +311,19 @@ export const Navbar: React.FC = () => {
                         <span>แก้ไขโปรไฟล์และรูปภาพ</span>
                       </button>
 
-                      {/* Admin Tools */}
+                      {/* System Settings for Admin */}
                       {currentUser.role === 'admin' && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsUserDropdownOpen(false);
-                              setActiveView('backup');
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 rounded-xl transition cursor-pointer"
-                          >
-                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                            <span>ศูนย์สำรองข้อมูล & ป้องกันรีเซ็ต</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsUserDropdownOpen(false);
-                              setActiveView('audit_logs');
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 rounded-xl transition cursor-pointer"
-                          >
-                            <History className="w-4 h-4 text-blue-600" />
-                            <span>ประวัติการใช้งานและสิทธิ์ (Audit Trail)</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsUserDropdownOpen(false);
-                              setActiveView('settings');
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition cursor-pointer"
-                          >
-                            <Settings className="w-4 h-4 text-slate-500" />
-                            <span>ตั้งค่าระบบ (System Settings)</span>
-                          </button>
-                        </>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserDropdownOpen(false);
+                            setActiveView('settings');
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition cursor-pointer"
+                        >
+                          <Settings className="w-4 h-4 text-slate-500" />
+                          <span>ตั้งค่าระบบ (System Settings)</span>
+                        </button>
                       )}
 
                       {/* Demo Switcher */}

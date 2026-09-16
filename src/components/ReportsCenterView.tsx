@@ -18,7 +18,6 @@ import {
 import { exportToCSV, getGradeInfo } from '../utils/evaluationCalculator';
 import { AggregatedResult } from '../types';
 import { downloadIndividualPdf } from '../utils/pdfExport';
-import { AuditLogsView } from './AuditLogsView';
 
 interface ReportsCenterViewProps {
   onOpenReport: (result: AggregatedResult) => void;
@@ -183,9 +182,36 @@ export const ReportsCenterView: React.FC<ReportsCenterViewProps> = ({ onOpenRepo
         </div>
       )}
 
-      {/* Tab 2: Security & Audit Logs (Full Audit Trail & Permission History) */}
+      {/* Tab 2: Security & Audit Logs */}
       {activeTab === 'audit' && (
-        <AuditLogsView />
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>บันทึกความปลอดภัยและประวัติการลงคะแนน (Anti-Tampering Trail)</span>
+            </h3>
+            <span className="text-xs text-slate-400">ระบบบันทึกเวลาสากล ISO-8601</span>
+          </div>
+
+          <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto font-mono text-xs">
+            {auditLogs.map((log) => (
+              <div key={log.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">
+                      {log.action}
+                    </span>
+                    <span className="font-bold text-slate-900 font-sans">{log.userName}</span>
+                  </div>
+                  <div className="text-slate-600 font-sans text-xs">{log.details}</div>
+                </div>
+                <div className="text-[11px] text-slate-400 shrink-0">
+                  {new Date(log.timestamp).toLocaleString('th-TH')}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
