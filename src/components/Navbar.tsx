@@ -157,12 +157,12 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
             
             {/* Left: Mobile Hamburger + Custom Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Hamburger Button for Mobile */}
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+                className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer shrink-0"
                 aria-label="เปิดเมนูหลัก"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -171,9 +171,9 @@ export const Navbar: React.FC = () => {
               {/* Logo & School Title */}
               <div
                 onClick={() => setActiveView(currentUser.role === 'staff' ? 'my_evaluation' : 'dashboard')}
-                className="flex items-center gap-3 cursor-pointer select-none group"
+                className="flex items-center gap-3 cursor-pointer select-none group min-w-0"
               >
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 flex items-center justify-center text-white shadow-md shadow-blue-700/25 group-hover:scale-105 transition overflow-hidden p-1.5">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 flex items-center justify-center text-white shadow-md shadow-blue-700/25 group-hover:scale-105 transition overflow-hidden p-1.5 shrink-0">
                   {systemSettings.logoUrl ? (
                     <img
                       src={systemSettings.logoUrl}
@@ -184,12 +184,12 @@ export const Navbar: React.FC = () => {
                     <Award className="w-6 h-6 text-amber-300" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h1 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                    <h1 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                       {systemSettings.appName || 'ระบบประเมินการปฏิบัติงาน'}
                     </h1>
-                    <span className="hidden sm:inline-block text-[10px] uppercase font-mono tracking-wider bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                    <span className="hidden md:inline-block text-[10px] uppercase font-mono tracking-wider bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200 shrink-0">
                       {systemSettings.appShortName || 'PES v3.0'}
                     </span>
                   </div>
@@ -201,7 +201,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Right: Demo Switcher & User Profile Menu */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Cloud Realtime Sync Indicator / Button */}
               <button
                 type="button"
@@ -276,18 +276,18 @@ export const Navbar: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="hidden md:block">
+                  <div className="hidden sm:block">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-900 max-w-[130px] truncate">
-                        {currentUser?.name}
+                      <span className="text-xs font-bold text-slate-900 max-w-[110px] md:max-w-[150px] truncate">
+                        {currentUser?.name || 'ผู้ใช้งาน'}
                       </span>
                       {getRoleBadge(currentUser?.role || 'staff')}
                     </div>
-                    <div className="text-[10px] text-slate-500 max-w-[160px] truncate">
-                      {currentUser?.position}
+                    <div className="text-[10px] text-slate-500 max-w-[120px] md:max-w-[170px] truncate">
+                      {currentUser?.position || ''}
                     </div>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 </button>
 
                 {/* Dropdown Menu */}
@@ -295,12 +295,12 @@ export const Navbar: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                     <div className="px-4 py-2.5 border-b border-slate-100">
                       <div className="text-xs font-bold text-slate-900 truncate">
-                        {currentUser.name}
+                        {currentUser?.name || 'ผู้ใช้งาน'}
                       </div>
                       <div className="text-[11px] text-slate-500 truncate">
-                        {currentUser.position}
+                        {currentUser?.position || ''}
                       </div>
-                      <div className="mt-1">{getRoleBadge(currentUser.role)}</div>
+                      <div className="mt-1">{getRoleBadge(currentUser?.role || 'staff')}</div>
                     </div>
 
                     <div className="p-1 space-y-0.5">
