@@ -226,11 +226,73 @@ export interface AggregatedResult {
   lastUpdated: string;
 }
 
+export type AuditActionCategory =
+  | 'AUTH'            // เข้าสู่ระบบ, ออกจากระบบ, สลับตัวตน
+  | 'PERMISSION'      // ปรับเปลี่ยนสิทธิ์, มอบหมายบทบาท, สิทธิ์คณะกรรมการ
+  | 'EVALUATION'      // บันทึกแบบประเมิน, ส่งผลประเมิน, อนุมัติผล
+  | 'USER_MANAGEMENT' // เพิ่ม, แก้ไข, ลบ ผู้ใช้งาน
+  | 'COMMITTEE'       // จัดกลุ่มกรรมการ, มอบหมายผู้รับการประเมิน
+  | 'SYSTEM'          // ตั้งค่าระบบ, เกณฑ์คะแนน, แบบฟอร์ม
+  | 'BACKUP';         // สำรองข้อมูล, กู้คืนข้อมูล, คลังจัดเก็บข้อมูลสำรวจ
+
 export interface AuditLog {
   id: string;
   timestamp: string;
   userId: string;
   userName: string;
+  userRole?: string;
   action: string;
+  category?: AuditActionCategory;
   details: string;
+  targetUserId?: string;
+  targetUserName?: string;
+  previousValue?: string;
+  newValue?: string;
+  status?: 'SUCCESS' | 'WARNING' | 'ERROR';
+  ipAddress?: string;
+  deviceInfo?: string;
+}
+
+export interface SystemBackupData {
+  version: string;
+  exportedAt: string;
+  exportedBy: {
+    id: string;
+    name: string;
+    role: string;
+    position: string;
+  };
+  systemSettings: SystemSettings;
+  gradeThresholds: GradeThreshold[];
+  targetPositionGroups: TargetPositionGroup[];
+  users: User[];
+  committeeGroups: CommitteeGroup[];
+  formTemplates: FormTemplate[];
+  submissions: EvaluationSubmission[];
+  auditLogs: AuditLog[];
+  stats: {
+    totalUsers: number;
+    totalEvaluators: number;
+    totalEvaluatees: number;
+    totalGroups: number;
+    totalForms: number;
+    totalSubmissions: number;
+    academicYear: string;
+    evaluationRound: string;
+  };
+  notes?: string;
+}
+
+export interface LocalSnapshotItem {
+  id: string;
+  name: string;
+  createdAt: string;
+  createdBy: string;
+  creatorRole?: string;
+  notes?: string;
+  autoCreated?: boolean;
+  totalUsers: number;
+  totalSubmissions: number;
+  data: SystemBackupData;
+  sizeBytes?: number;
 }

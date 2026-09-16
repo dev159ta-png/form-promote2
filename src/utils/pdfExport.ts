@@ -24,33 +24,42 @@ function getReportCss(): string {
   return `
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
     
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
     .pes-pdf-root {
       box-sizing: border-box;
       font-family: 'Sarabun', 'TH Sarabun New', Tahoma, sans-serif !important;
       background-color: #ffffff;
       color: #111827;
       width: 794px;
-      padding: 22px 34px;
+      padding: 20px 30px;
       margin: 0;
-      line-height: 1.35;
-      font-size: 12pt;
-      letter-spacing: normal !important;
-      -webkit-font-smoothing: antialiased;
+      line-height: 1.75;
+      font-size: 11.5pt;
+      letter-spacing: 0px !important;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
     .pes-pdf-root * {
       box-sizing: border-box;
       font-family: 'Sarabun', 'TH Sarabun New', Tahoma, sans-serif !important;
+      line-height: inherit;
     }
     .pes-header {
       text-align: center;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 2px solid #1e293b;
     }
     .pes-logo {
       width: 52px;
       height: 52px;
-      margin: 0 auto 4px;
+      margin: 0 auto 6px;
     }
     .pes-logo img {
       width: 100%;
@@ -60,37 +69,46 @@ function getReportCss(): string {
     .pes-title {
       font-size: 14pt;
       font-weight: 700;
-      margin: 0 0 2px;
+      line-height: 1.6;
+      margin: 0 0 4px;
       color: #0f172a;
     }
     .pes-subtitle {
       font-size: 11pt;
+      line-height: 1.6;
       color: #334155;
-      margin: 0 0 2px;
+      margin: 0 0 4px;
     }
     .pes-school-info {
-      font-size: 10pt;
+      font-size: 9.5pt;
+      line-height: 1.6;
       color: #475569;
       white-space: nowrap;
+      text-align: center;
+      margin-top: 2px;
+      letter-spacing: -0.15px;
+      word-break: keep-all;
     }
     .pes-section-title {
       font-size: 11.5pt;
       font-weight: 700;
+      line-height: 1.6;
       background: #f1f5f9;
-      padding: 3px 8px;
+      padding: 5px 10px;
       border-radius: 4px;
       border-left: 4px solid #1e40af;
-      margin: 8px 0 4px;
+      margin: 10px 0 6px;
       color: #0f172a;
     }
     .pes-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .pes-table td {
-      padding: 2px 4px;
+      padding: 5px 6px;
       font-size: 11pt;
+      line-height: 1.65;
       vertical-align: top;
     }
     .pes-label {
@@ -104,44 +122,49 @@ function getReportCss(): string {
     .pes-score-grid {
       display: flex;
       gap: 8px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .pes-score-box {
       flex: 1;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      padding: 5px 4px;
+      padding: 6px 4px;
       text-align: center;
       background: #f8fafc;
+      line-height: 1.6;
     }
     .pes-score-box-lbl {
       font-size: 10pt;
       color: #64748b;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
+      line-height: 1.5;
     }
     .pes-score-box-num {
       font-size: 15pt;
       font-weight: 800;
       color: #0f172a;
+      line-height: 1.4;
     }
     .pes-badge {
       display: inline-block;
-      padding: 2px 10px;
+      padding: 3px 12px;
       border-radius: 12px;
       font-weight: 700;
       font-size: 11pt;
+      line-height: 1.5;
       background: #e0e7ff;
       color: #1e3a8a;
       border: 1px solid #bfdbfe;
     }
     .pes-thresholds {
       font-size: 9pt;
+      line-height: 1.6;
       color: #475569;
       background: #f8fafc;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 5px;
       border: 1px solid #e2e8f0;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .pes-threshold-grid {
       display: grid;
@@ -152,66 +175,70 @@ function getReportCss(): string {
     }
     .pes-card {
       border: 1px solid #e2e8f0;
-      border-radius: 5px;
-      padding: 4px 8px;
-      margin-bottom: 4px;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
       background: #ffffff;
+      line-height: 1.65;
       page-break-inside: avoid;
     }
     .pes-card-hdr {
       display: flex;
       justify-content: space-between;
       border-bottom: 1px dashed #cbd5e1;
-      padding-bottom: 2px;
-      margin-bottom: 2px;
+      padding-bottom: 4px;
+      margin-bottom: 4px;
       font-size: 10.5pt;
+      line-height: 1.6;
     }
     .pes-card-score {
       font-weight: 700;
       color: #1e40af;
     }
     .pes-card-comments {
-      font-size: 9.5pt;
+      font-size: 10pt;
       color: #334155;
+      line-height: 1.65;
     }
     .pes-comment {
-      margin: 1px 0;
+      margin: 2px 0;
     }
     .pes-sigs-grid {
       display: flex;
       justify-content: space-around;
       gap: 8px;
-      margin-top: 6px;
+      margin-top: 8px;
       page-break-inside: avoid;
     }
     .pes-sig-box {
       flex: 1;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      padding: 5px 3px;
+      padding: 8px 4px;
       text-align: center;
       background: #fcfcfd;
+      line-height: 1.6;
     }
     .pes-sig-img-wrap {
-      height: 40px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .pes-sig-img {
-      max-height: 38px;
+      max-height: 40px;
       max-width: 110px;
       object-fit: contain;
     }
     .pes-sig-placeholder {
-      font-size: 9pt;
+      font-size: 9.5pt;
       color: #94a3b8;
       font-style: italic;
     }
     .pes-sig-line {
       border-top: 1px solid #94a3b8;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       width: 80%;
       margin-left: auto;
       margin-right: auto;
@@ -220,24 +247,29 @@ function getReportCss(): string {
       font-weight: 700;
       font-size: 10.5pt;
       color: #0f172a;
+      line-height: 1.5;
+      padding-top: 2px;
     }
     .pes-sig-pos {
-      font-size: 9pt;
+      font-size: 9.5pt;
       color: #64748b;
+      line-height: 1.5;
     }
     .pes-sig-date {
-      font-size: 8pt;
+      font-size: 8.5pt;
       color: #94a3b8;
-      margin-top: 1px;
+      margin-top: 2px;
+      line-height: 1.5;
     }
     .pes-approval {
       display: flex;
       justify-content: space-around;
-      margin-top: 8px;
-      padding-top: 6px;
+      margin-top: 10px;
+      padding-top: 8px;
       border-top: 2px solid #cbd5e1;
       text-align: center;
       page-break-inside: avoid;
+      line-height: 1.65;
     }
     .pes-approval-box {
       width: 46%;
@@ -249,12 +281,13 @@ function getReportCss(): string {
       margin: 0 auto 4px;
     }
     .pes-footer {
-      margin-top: 8px;
+      margin-top: 10px;
       text-align: center;
-      font-size: 8.5pt;
+      font-size: 9pt;
+      line-height: 1.5;
       color: #94a3b8;
       border-top: 1px solid #e2e8f0;
-      padding-top: 3px;
+      padding-top: 4px;
     }
   `;
 }
@@ -329,7 +362,7 @@ function buildOfficialReportBody(
         }
         <h1 class="pes-title">${formTitle}</h1>
         <div class="pes-subtitle">${systemSettings.evaluationRound} ประจำปีงบประมาณ ${systemSettings.academicYear}</div>
-        <div class="pes-school-info">สถานศึกษา: ${systemSettings.schoolName} (${systemSettings.schoolAffiliation})</div>
+        <div class="pes-school-info"><span style="white-space: nowrap;">สถานศึกษา: ${systemSettings.schoolName}</span> <span style="white-space: nowrap;">(${systemSettings.schoolAffiliation})</span></div>
       </div>
 
       <div class="pes-section-title">ตอนที่ 1: ข้อมูลของผู้รับการประเมิน</div>
@@ -483,9 +516,15 @@ async function renderHtmlToPdf(
   htmlContent: string,
   filename: string
 ): Promise<void> {
-  // 1. Ensure Sarabun and system fonts are ready
-  if (document.fonts && document.fonts.ready) {
+  // 1. Ensure Sarabun and system fonts are ready and loaded into memory
+  if (document.fonts) {
     try {
+      await Promise.all([
+        document.fonts.load('400 12pt Sarabun'),
+        document.fonts.load('600 12pt Sarabun'),
+        document.fonts.load('700 12pt Sarabun'),
+        document.fonts.load('700 14pt Sarabun'),
+      ]);
       await document.fonts.ready;
     } catch (e) {
       console.warn('Font loading check non-fatal error:', e);
@@ -515,13 +554,14 @@ async function renderHtmlToPdf(
     // 3. Wait for all images (logos, signatures) to load
     await waitForImagesToLoad(sandbox);
 
-    // Short buffer for CSS rendering
-    await new Promise((r) => setTimeout(r, 200));
+    // Buffer for CSS layout and Thai font metrics settling
+    await new Promise((r) => setTimeout(r, 350));
 
     // 4. Capture with html2canvas (2x scale for 300 DPI sharpness)
     const canvas = await html2canvas(sandbox, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       logging: false,
       backgroundColor: '#ffffff',
       scrollX: 0,
@@ -556,7 +596,7 @@ async function renderHtmlToPdf(
     const sandboxRect = sandbox.getBoundingClientRect();
     const breakableElements = Array.from(
       sandbox.querySelectorAll<HTMLElement>(
-        '.pes-header, .pes-section-title, .pes-table, .pes-table tr, .pes-score-grid, .pes-thresholds, .pes-card, .pes-sigs-grid, .pes-sig-box, .pes-approval, .pes-approval-box, .pes-footer, h1, h2, h3, h4, p, table, tr, td'
+        '.pes-header, .pes-section-title, .pes-table, .pes-table tr, .pes-score-grid, .pes-thresholds, .pes-card, .pes-card-hdr, .pes-comment, .pes-sigs-grid, .pes-sig-box, .pes-approval, .pes-approval-box, .pes-footer, h1, h2, h3, h4, p, table, tr, td'
       )
     );
 
@@ -592,20 +632,20 @@ async function renderHtmlToPdf(
         const minCrossingTop = Math.min(...crossing.map((inv) => inv.top));
         // Keep at least 25% of the page
         if (minCrossingTop > currentY + maxPageCanvasHeight * 0.25) {
-          safeCutY = minCrossingTop - Math.round(4 * 2);
+          safeCutY = minCrossingTop - Math.round(6 * 2);
         }
       }
 
       // Search for a horizontal row of white pixels near safeCutY to guarantee zero cut characters
       if (canvasCtx) {
         const scanStart = Math.min(safeCutY, canvas.height - 1);
-        const scanLimit = Math.max(currentY + Math.round(60 * 2), scanStart - Math.round(50 * 2));
+        const scanLimit = Math.max(currentY + Math.round(60 * 2), scanStart - Math.round(60 * 2));
         let bestWhiteRow = -1;
 
         for (let y = scanStart; y >= scanLimit; y -= 2) {
           let isLineWhite = true;
-          const step = Math.floor(canvas.width / 24);
-          for (let x = Math.floor(step / 2); x < canvas.width; x += step) {
+          const step = 8; // Dense sampling every 8 pixels across the canvas width to never miss a letter
+          for (let x = 30; x < canvas.width - 30; x += step) {
             const p = canvasCtx.getImageData(x, y, 1, 1).data;
             if (p[0] < 240 || p[1] < 240 || p[2] < 240) {
               isLineWhite = false;

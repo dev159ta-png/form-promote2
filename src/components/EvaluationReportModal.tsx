@@ -212,8 +212,9 @@ ${result.submissions
             <p className="text-xs sm:text-sm font-medium text-slate-600">
               {systemSettings.evaluationRound} ประจำปีงบประมาณ {systemSettings.academicYear}
             </p>
-            <div className="text-[11px] sm:text-xs text-slate-600 font-medium whitespace-nowrap text-center overflow-x-auto sm:overflow-x-visible">
-              สถานศึกษา: {systemSettings.schoolName} ({systemSettings.schoolAffiliation})
+            <div className="text-[10px] sm:text-xs text-slate-600 font-medium whitespace-nowrap text-center overflow-hidden text-ellipsis flex items-center justify-center gap-1">
+              <span className="whitespace-nowrap shrink-0">สถานศึกษา: {systemSettings.schoolName}</span>
+              <span className="whitespace-nowrap shrink-0">({systemSettings.schoolAffiliation})</span>
             </div>
           </div>
 

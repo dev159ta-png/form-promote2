@@ -33,6 +33,7 @@ import {
 import { PRESET_LOGOS, PES_GOLD_LOGO } from '../data/presetLogos';
 import { TargetPositionGroupModal } from './TargetPositionGroupModal';
 import { firebaseConfig } from '../firebase/config';
+import { BackupAndRestoreCenter } from './BackupAndRestoreCenter';
 
 export const SystemSettingsView: React.FC = () => {
   const {
@@ -63,7 +64,7 @@ export const SystemSettingsView: React.FC = () => {
   });
 
   const [isSaved, setIsSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'logo' | 'demo' | 'round' | 'groups'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'logo' | 'demo' | 'round' | 'groups' | 'backup'>('general');
   const [isDragging, setIsDragging] = useState(false);
   const [customUrlInput, setCustomUrlInput] = useState('');
 
@@ -268,6 +269,19 @@ export const SystemSettingsView: React.FC = () => {
           >
             กลุ่มสายงานเป้าหมาย ({targetPositionGroups.length})
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('backup')}
+            className={`px-3.5 py-1.5 rounded-xl font-semibold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'backup'
+                ? 'bg-emerald-500 text-white shadow-md'
+                : 'text-emerald-200 hover:bg-white/10'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>ศูนย์สำรองข้อมูล & ป้องกันรีเซ็ต</span>
+          </button>
         </div>
       </div>
 
@@ -312,8 +326,22 @@ export const SystemSettingsView: React.FC = () => {
         </div>
       )}
 
-      {/* Main Settings Form Grid */}
-      <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Settings Form Grid or Backup Center */}
+      {activeTab === 'backup' ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setActiveTab('general')}
+              className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 cursor-pointer py-1"
+            >
+              ← กลับไปที่การตั้งค่าระบบทั่วไป
+            </button>
+          </div>
+          <BackupAndRestoreCenter />
+        </div>
+      ) : (
+        <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Form Controls */}
         <div className="lg:col-span-2 space-y-6">
           {/* Section 1: Logo Management */}
@@ -831,8 +859,9 @@ export const SystemSettingsView: React.FC = () => {
                 <div className="text-[10px] text-slate-600 font-sans">
                   {formData.evaluationRound} ประจำปีงบประมาณ {formData.academicYear}
                 </div>
-                <div className="text-[10px] text-slate-500 font-sans">
-                  {formData.schoolName} ({formData.schoolAffiliation})
+                <div className="text-[10px] text-slate-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center gap-1">
+                  <span className="whitespace-nowrap shrink-0">{formData.schoolName}</span>
+                  <span className="whitespace-nowrap shrink-0">({formData.schoolAffiliation})</span>
                 </div>
               </div>
             </div>
@@ -883,6 +912,7 @@ export const SystemSettingsView: React.FC = () => {
           </div>
         </div>
       </form>
+      )}
 
       {/* Target Position Group Modal */}
       <TargetPositionGroupModal
