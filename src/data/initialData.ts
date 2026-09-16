@@ -688,9 +688,10 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางสาวอรวรรณ พงษ์ศิริ',
       supervisorPosition: 'รองผู้อำนวยการชำนาญการพิเศษ',
-      supervisorSignedAt: '2026-09-16T09:30:00.000Z',
+      supervisorSignedAt: '2026-04-01T09:30:00.000Z',
     },
-    submittedAt: '2026-09-16T09:30:00.000Z',
+    submittedAt: '2026-04-01T09:30:00.000Z',
+    updatedAt: '2026-04-01T09:30:00.000Z',
     isDraft: false,
     aiFeedback: {
       strengthsSummary: 'มีความเชี่ยวชาญการออกแบบการสอนสำหรับเด็กพิเศษและการปรับใช้สื่อดิจิทัล',
@@ -758,9 +759,10 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางพนิดา สมบูรณ์ชัย',
       supervisorPosition: 'ครูชำนาญการพิเศษ',
-      supervisorSignedAt: '2026-09-16T10:15:00.000Z',
+      supervisorSignedAt: '2026-04-01T10:15:00.000Z',
     },
-    submittedAt: '2026-09-16T10:15:00.000Z',
+    submittedAt: '2026-04-01T10:15:00.000Z',
+    updatedAt: '2026-04-01T10:15:00.000Z',
     isDraft: false,
   },
 
@@ -808,9 +810,10 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
       decision: 'continue',
       supervisorName: 'นางสาวนุชจรินทร์ โพธิ์เงิน',
       supervisorPosition: 'รองผู้อำนวยการชำนาญการ',
-      supervisorSignedAt: '2026-09-17T11:00:00.000Z',
+      supervisorSignedAt: '2026-04-01T11:00:00.000Z',
     },
-    submittedAt: '2026-09-17T11:00:00.000Z',
+    submittedAt: '2026-04-01T11:00:00.000Z',
+    updatedAt: '2026-04-01T11:00:00.000Z',
     isDraft: false,
   },
 
@@ -855,7 +858,8 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
     recommendation: {
       decision: 'continue',
     },
-    submittedAt: '2026-09-17T11:30:00.000Z',
+    submittedAt: '2026-04-01T11:30:00.000Z',
+    updatedAt: '2026-04-01T11:30:00.000Z',
     isDraft: false,
   },
 
@@ -899,7 +903,8 @@ export const INITIAL_SUBMISSIONS: EvaluationSubmission[] = [
     recommendation: {
       decision: 'continue',
     },
-    submittedAt: '2026-09-17T13:45:00.000Z',
+    submittedAt: '2026-04-01T13:45:00.000Z',
+    updatedAt: '2026-04-01T13:45:00.000Z',
     isDraft: false,
   },
 ];

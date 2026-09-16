@@ -152,6 +152,7 @@ export interface SystemSettings {
   evaluationRound: string;
   directorName?: string;
   directorPosition?: string;
+  updatedAt?: string;
 }
 
 export interface EvaluationSubmission {
@@ -194,6 +195,7 @@ export interface EvaluationSubmission {
 
   signatureDataUrl?: string;
   submittedAt: string;
+  updatedAt?: string;
   isDraft: boolean;
   
   aiFeedback?: {
