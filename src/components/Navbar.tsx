@@ -58,9 +58,15 @@ export const Navbar: React.FC = () => {
       await syncAllToFirebase();
       setSyncToast('ซิงค์ข้อมูลตรงกันทุกอุปกรณ์สำเร็จ!');
       setTimeout(() => setSyncToast(null), 3000);
-    } catch (e) {
-      setSyncToast('เกิดข้อผิดพลาดในการซิงค์ข้อมูล');
-      setTimeout(() => setSyncToast(null), 3000);
+    } catch (e: any) {
+      const errMsg = String(e?.message || '');
+      const errCode = String(e?.code || '');
+      if (errCode === 'resource-exhausted' || errMsg.includes('Quota') || errMsg.includes('resource-exhausted')) {
+        setSyncToast('Firebase โควตาฟรีรายวันเต็ม (Spark Plan) ข้อมูลถูกจัดเก็บในเครื่องอย่างปลอดภัยโดยไม่สูญหาย');
+      } else {
+        setSyncToast('เกิดข้อผิดพลาดในการซิงค์ข้อมูล');
+      }
+      setTimeout(() => setSyncToast(null), 4000);
     }
   };
 

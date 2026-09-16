@@ -204,6 +204,7 @@ interface AppContextType {
   // Firebase status
   isFirebaseSyncing: boolean;
   isFirebaseConnected: boolean;
+  isQuotaExceeded: boolean;
   syncAllToFirebase: () => Promise<void>;
   
   // Navigation / Active Context
@@ -286,6 +287,11 @@ function broadcastSync(type: string, payload: any) {
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isFirebaseSyncing, setIsFirebaseSyncing] = useState<boolean>(false);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState<boolean>(true);
+  const [isQuotaExceeded, setIsQuotaExceeded] = useState<boolean>(() => FirebaseService.isQuotaExhausted());
+
+  useEffect(() => {
+    return FirebaseService.onQuotaStateChange(setIsQuotaExceeded);
+  }, []);
 
   // 1. Users state
   const [users, setUsers] = useState<User[]>(() => {
@@ -490,51 +496,150 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Setup real-time listeners for all models across all devices (PC, Android, iOS)
         unsubSettings = FirebaseService.listenSystemSettings((remoteSettings) => {
           if (remoteSettings) {
-            setSystemSettings((prev) => ({ ...prev, ...remoteSettings }));
+            setSystemSettings((prev) => {
+              const localTime = prev.updatedAt ? new Date(prev.updatedAt).getTime() : 0;
+              const remoteTime = remoteSettings.updatedAt ? new Date(remoteSettings.updatedAt).getTime() : 0;
+              return localTime > remoteTime ? prev : { ...prev, ...remoteSettings };
+            });
           }
         });
 
         unsubUsers = FirebaseService.listenUsers((remoteUsers) => {
           if (remoteUsers && remoteUsers.length > 0) {
-            const { sanitized } = sanitizeAndFixUsers(remoteUsers);
-            setUsers(sanitized);
+            setUsers((prevUsers) => {
+              const prevMap = new Map<string, User>(prevUsers.map((u) => [u.id, u]));
+              const mergedUsers = remoteUsers.map((remoteUser) => {
+                const localUser = prevMap.get(remoteUser.id);
+                if (!localUser) return remoteUser;
+
+                const localTime = localUser.updatedAt ? new Date(localUser.updatedAt).getTime() : 0;
+                const remoteTime = remoteUser.updatedAt ? new Date(remoteUser.updatedAt).getTime() : 0;
+
+                // Anti-rollback protection: If local user was updated more recently, keep local user!
+                if (localTime > remoteTime) {
+                  return localUser;
+                }
+                return { ...localUser, ...remoteUser };
+              });
+
+              // Keep any users added locally that have not synced to remote yet
+              const remoteIds = new Set<string>(remoteUsers.map((u) => u.id));
+              prevUsers.forEach((u) => {
+                if (!remoteIds.has(u.id)) {
+                  mergedUsers.push(u);
+                }
+              });
+
+              const { sanitized } = sanitizeAndFixUsers(mergedUsers);
+              return sanitized;
+            });
+
             setCurrentUser((prevCurr) => {
-              const matched = sanitized.find((u) => u.id === prevCurr.id);
-              return matched ? { ...prevCurr, ...matched } : prevCurr;
+              const matched = remoteUsers.find((u) => u.id === prevCurr.id);
+              if (!matched) return prevCurr;
+
+              const localTime = prevCurr.updatedAt ? new Date(prevCurr.updatedAt).getTime() : 0;
+              const remoteTime = matched.updatedAt ? new Date(matched.updatedAt).getTime() : 0;
+              if (localTime > remoteTime) {
+                return prevCurr;
+              }
+              return { ...prevCurr, ...matched };
             });
           }
         });
 
         unsubGroups = FirebaseService.listenCommitteeGroups((remoteGroups) => {
           if (remoteGroups && remoteGroups.length > 0) {
-            setCommitteeGroups(remoteGroups);
+            setCommitteeGroups((prevGroups) => {
+              const prevMap = new Map<string, CommitteeGroup>(prevGroups.map((g) => [g.id, g]));
+              const merged = remoteGroups.map((remoteG) => {
+                const localG = prevMap.get(remoteG.id);
+                if (!localG) return remoteG;
+                const localTime = localG.updatedAt ? new Date(localG.updatedAt).getTime() : 0;
+                const remoteTime = remoteG.updatedAt ? new Date(remoteG.updatedAt).getTime() : 0;
+                return localTime > remoteTime ? localG : remoteG;
+              });
+              const remoteIds = new Set<string>(remoteGroups.map((g) => g.id));
+              prevGroups.forEach((g) => {
+                if (!remoteIds.has(g.id)) merged.push(g);
+              });
+              return merged;
+            });
           }
         });
 
         unsubTargetGroups = FirebaseService.listenTargetPositionGroups((remoteTargetGroups) => {
           if (remoteTargetGroups && remoteTargetGroups.length > 0) {
-            setTargetPositionGroups(remoteTargetGroups);
+            setTargetPositionGroups((prev) => {
+              const prevMap = new Map<string, TargetPositionGroup>(prev.map((g) => [g.id, g]));
+              const merged = remoteTargetGroups.map((remoteG) => {
+                const localG = prevMap.get(remoteG.id);
+                if (!localG) return remoteG;
+                const localTime = localG.updatedAt ? new Date(localG.updatedAt).getTime() : 0;
+                const remoteTime = remoteG.updatedAt ? new Date(remoteG.updatedAt).getTime() : 0;
+                return localTime > remoteTime ? localG : remoteG;
+              });
+              const remoteIds = new Set<string>(remoteTargetGroups.map((g) => g.id));
+              prev.forEach((g) => {
+                if (!remoteIds.has(g.id)) merged.push(g);
+              });
+              return merged;
+            });
           }
         });
 
         unsubTemplates = FirebaseService.listenFormTemplates((remoteTemplates) => {
           if (remoteTemplates && remoteTemplates.length > 0) {
-            setFormTemplates(remoteTemplates);
+            setFormTemplates((prev) => {
+              const prevMap = new Map<string, FormTemplate>(prev.map((t) => [t.id, t]));
+              const merged = remoteTemplates.map((remoteT) => {
+                const localT = prevMap.get(remoteT.id);
+                if (!localT) return remoteT;
+                return localT; // keep customized templates
+              });
+              const remoteIds = new Set<string>(remoteTemplates.map((t) => t.id));
+              prev.forEach((t) => {
+                if (!remoteIds.has(t.id)) merged.push(t);
+              });
+              return merged;
+            });
           }
         });
 
         unsubSubs = FirebaseService.listenSubmissions((remoteSubs) => {
           if (remoteSubs) {
-            // Deduplicate remote submissions in memory by evaluateeId and evaluatorId, keeping latest submittedAt
-            const subMap = new Map<string, EvaluationSubmission>();
-            const sorted = [...remoteSubs].sort(
-              (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
-            );
-            sorted.forEach((sub) => {
-              const key = `${sub.evaluateeId}_${sub.evaluatorId}`;
-              subMap.set(key, sub);
+            setSubmissions((prevSubs) => {
+              const subMap = new Map<string, EvaluationSubmission>();
+              
+              // 1. Populate remote
+              remoteSubs.forEach((sub) => {
+                const key = `${sub.evaluateeId}_${sub.evaluatorId}`;
+                subMap.set(key, sub);
+              });
+
+              // 2. Anti-rollback protection: check local submissions
+              prevSubs.forEach((localSub) => {
+                const key = `${localSub.evaluateeId}_${localSub.evaluatorId}`;
+                const remoteSub = subMap.get(key);
+                if (!remoteSub) {
+                  // Not found on server (e.g. pending write or rejected by quota) -> KEEP LOCAL
+                  subMap.set(key, localSub);
+                } else {
+                  const localTime = localSub.updatedAt
+                    ? new Date(localSub.updatedAt).getTime()
+                    : new Date(localSub.submittedAt).getTime();
+                  const remoteTime = remoteSub.updatedAt
+                    ? new Date(remoteSub.updatedAt).getTime()
+                    : new Date(remoteSub.submittedAt).getTime();
+
+                  if (localTime >= remoteTime) {
+                    subMap.set(key, localSub);
+                  }
+                }
+              });
+
+              return Array.from(subMap.values());
             });
-            setSubmissions(Array.from(subMap.values()));
           }
         });
 
@@ -745,10 +850,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     const submissionId = existing?.id || 'sub_' + Date.now();
 
+    const now = new Date().toISOString();
     const newSubmission: EvaluationSubmission = {
       ...data,
       id: submissionId,
-      submittedAt: new Date().toISOString(),
+      submittedAt: now,
+      updatedAt: now,
       isDraft: false,
     };
 
@@ -844,7 +951,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Update existing evaluation submission
   const updateSubmission = (updatedSubmission: EvaluationSubmission) => {
-    const finalized = { ...updatedSubmission, submittedAt: new Date().toISOString() };
+    const now = new Date().toISOString();
+    const finalized = { ...updatedSubmission, submittedAt: updatedSubmission.submittedAt || now, updatedAt: now };
     setSubmissions((prev) => {
       const next = prev.map((s) => (s.id === finalized.id ? finalized : s));
       broadcastSync('SUBMISSIONS_UPDATE', next);
@@ -862,10 +970,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     data: Omit<EvaluationSubmission, 'id' | 'submittedAt'> & { id?: string }
   ): EvaluationSubmission => {
     const submissionId = data.id || 'sub_admin_' + Date.now();
+    const now = new Date().toISOString();
     const finalSubmission: EvaluationSubmission = {
       ...data,
       id: submissionId,
-      submittedAt: new Date().toISOString(),
+      submittedAt: now,
+      updatedAt: now,
       isDraft: false,
     };
 
@@ -894,20 +1004,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Committee Group CRUD
   const updateCommitteeGroup = (group: CommitteeGroup) => {
+    const updated = { ...group, updatedAt: new Date().toISOString() };
     setCommitteeGroups((prev) => {
-      const next = prev.map((g) => (g.id === group.id ? group : g));
+      const next = prev.map((g) => (g.id === group.id ? updated : g));
       broadcastSync('GROUPS_UPDATE', next);
       return next;
     });
-    FirebaseService.saveCommitteeGroup(group).catch(console.error);
+    FirebaseService.saveCommitteeGroup(updated).catch(console.error);
     logAudit('UPDATE_COMMITTEE_GROUP', `แก้ไขข้อมูลกลุ่มคณะกรรมการ: ${group.name}`);
   };
 
   const addCommitteeGroup = (groupData: Omit<CommitteeGroup, 'id' | 'createdAt'>) => {
+    const now = new Date().toISOString();
     const newGroup: CommitteeGroup = {
       ...groupData,
       id: 'group_' + (committeeGroups.length + 1) + '_' + Date.now().toString(36),
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
     setCommitteeGroups((prev) => {
       const next = [...prev, newGroup];
@@ -974,12 +1087,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addUser = (userData: Omit<User, 'id'>): User => {
     const newId = (userData.role === 'evaluator' ? 'evaluator_' : userData.role === 'admin' ? 'user_admin_' : 'staff_') + Date.now();
     const avatarValue = userData.avatar !== undefined ? userData.avatar : userData.avatarUrl;
+    const now = new Date().toISOString();
     const newUser: User = {
       ...userData,
       id: newId,
       password: userData.password || 'password123',
       avatar: avatarValue,
       avatarUrl: avatarValue,
+      createdAt: now,
+      updatedAt: now,
     };
     setUsers((prev) => {
       const next = [newUser, ...prev];
@@ -993,10 +1109,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateUser = (user: User) => {
     const avatarValue = user.avatar !== undefined ? user.avatar : user.avatarUrl;
+    const now = new Date().toISOString();
     const synchronizedUser: User = {
       ...user,
       avatar: avatarValue,
       avatarUrl: avatarValue,
+      updatedAt: now,
     };
 
     setUsers((prev) => {
@@ -1062,9 +1180,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateUserProfile = (userId: string, updates: Partial<User>) => {
     const avatarValue = updates.avatar !== undefined ? updates.avatar : updates.avatarUrl;
+    const now = new Date().toISOString();
     const normalizedUpdates: Partial<User> = {
       ...updates,
       ...(avatarValue !== undefined ? { avatar: avatarValue, avatarUrl: avatarValue } : {}),
+      updatedAt: now,
     };
 
     let updatedUserObj: User | null = null;
@@ -1073,7 +1193,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (u.id === userId) {
           const updatedUser = { ...u, ...normalizedUpdates };
           updatedUserObj = updatedUser;
-          FirebaseService.saveUser(updatedUser).catch(console.error);
           return updatedUser;
         }
         return u;
@@ -1084,6 +1203,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (currentUser.id === userId) {
       setCurrentUser((prev) => ({ ...prev, ...normalizedUpdates }));
+    }
+
+    if (updatedUserObj) {
+      FirebaseService.saveUser(updatedUserObj).catch(console.error);
     }
 
     // Synchronously update submissions for real-time consistency
@@ -1258,6 +1381,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         aggregatedResults,
         isFirebaseSyncing,
         isFirebaseConnected,
+        isQuotaExceeded,
         syncAllToFirebase,
         activeView,
         setActiveView,

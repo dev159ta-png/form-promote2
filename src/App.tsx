@@ -16,13 +16,35 @@ import { AggregatedResult } from './types';
 import { ShieldCheck, Award } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
-  const { activeView, setActiveView, gradeThresholds, currentUser, systemSettings } = useApp();
+  const { activeView, setActiveView, gradeThresholds, currentUser, systemSettings, isQuotaExceeded } = useApp();
   const [selectedReportResult, setSelectedReportResult] = useState<AggregatedResult | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col selection:bg-blue-600 selection:text-white pb-16 lg:pb-0">
       {/* Top Navigation & Role Switcher */}
       <Navbar />
+
+      {/* Quota Exceeded Notice Banner */}
+      {isQuotaExceeded && (
+        <aside aria-label="สถานะการเชื่อมต่อฐานข้อมูล" className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs sm:text-sm">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span>
+                <strong>สถานะการบันทึก:</strong> ข้อมูลกำลังถูกจัดเก็บและซิงค์ผ่านเครื่องแบบ Real-time เนื่องจาก Firestore Cloud ใช้งานครบโควตาฟรีรายวัน (50k writes) ท่านสามารถประเมินผลและอัปเดตโปรไฟล์ได้ตามปกติ ข้อมูลจะไม่เด้งกลับ
+              </span>
+            </div>
+            <a
+              href="https://console.firebase.google.com/project/form-promote2/usage"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-700 underline font-semibold hover:text-blue-900 ml-auto shrink-0"
+            >
+              ตรวจสอบใน Firebase Console →
+            </a>
+          </div>
+        </aside>
+      )}
 
       {/* Main View Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">

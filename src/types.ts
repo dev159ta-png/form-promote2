@@ -36,6 +36,8 @@ export interface User {
   positionNumber?: string; // ตำแหน่งเลขที่ (เช่น พ-1042 หรือ ลำดับที่ตำแหน่ง ที่แอดมินกำหนดล่วงหน้า)
   formTemplateId?: string; // รหัสแบบฟอร์มการประเมินที่กำหนดเฉพาะบุคคล
   leaveStats?: LeaveStats; // สถิติการมาทำงานและการลาที่แอดมินบันทึกไว้ล่วงหน้า
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CommitteeGroup {
@@ -46,6 +48,7 @@ export interface CommitteeGroup {
   evaluatorIds: string[]; // List of User IDs in this committee
   assignedEvaluateeIds: string[]; // List of evaluatee User IDs assigned to this committee
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface RubricIndicator {
@@ -152,6 +155,8 @@ export interface SystemSettings {
   evaluationRound: string;
   directorName?: string;
   directorPosition?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EvaluationSubmission {
@@ -160,6 +165,7 @@ export interface EvaluationSubmission {
   evaluateeName: string;
   evaluateePosition: string;
   evaluateeDepartment: string;
+  evaluateeAvatar?: string;
   formId: string;
   formTitle: string;
   groupId: string;
@@ -194,6 +200,7 @@ export interface EvaluationSubmission {
 
   signatureDataUrl?: string;
   submittedAt: string;
+  updatedAt?: string;
   isDraft: boolean;
   
   aiFeedback?: {

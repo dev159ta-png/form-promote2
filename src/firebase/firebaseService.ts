@@ -48,16 +48,28 @@ function sanitizeForFirestore<T>(data: T): T {
   );
 }
 
-function isQuotaError(error: any): boolean {
+let quotaExhausted = false;
+const quotaListeners = new Set<(exhausted: boolean) => void>();
+
+export function isQuotaError(error: any): boolean {
   return (
     error?.code === 'resource-exhausted' ||
     String(error?.message || '').toLowerCase().includes('quota exceeded') ||
-    String(error?.message || '').toLowerCase().includes('resource-exhausted')
+    String(error?.message || '').toLowerCase().includes('resource-exhausted') ||
+    String(error?.message || '').includes('RESOURCE_EXHAUSTED')
   );
+}
+
+export function setQuotaExhausted(val: boolean) {
+  if (quotaExhausted !== val) {
+    quotaExhausted = val;
+    quotaListeners.forEach((cb) => cb(val));
+  }
 }
 
 let lastQuotaWarn = 0;
 function logQuotaWarningOnce() {
+  setQuotaExhausted(true);
   const now = Date.now();
   if (now - lastQuotaWarn > 30000) {
     console.warn('Firestore Quota reached: App operating smoothly with local real-time synchronization.');
@@ -66,6 +78,16 @@ function logQuotaWarningOnce() {
 }
 
 export const FirebaseService = {
+  isQuotaExhausted(): boolean {
+    return quotaExhausted;
+  },
+
+  onQuotaStateChange(callback: (exhausted: boolean) => void): () => void {
+    quotaListeners.add(callback);
+    callback(quotaExhausted);
+    return () => quotaListeners.delete(callback);
+  },
+
   // ----------------------------------------------------
   // System Settings
   // ----------------------------------------------------
@@ -78,7 +100,11 @@ export const FirebaseService = {
       }
       return null;
     } catch (error) {
-      console.error('Error getting system settings from Firebase:', error);
+      if (isQuotaError(error)) {
+        logQuotaWarningOnce();
+      } else {
+        console.error('Error getting system settings from Firebase:', error);
+      }
       return null;
     }
   },
@@ -89,8 +115,11 @@ export const FirebaseService = {
       const cleanData = sanitizeForFirestore({ ...settings, updatedAt: new Date().toISOString() });
       await setDoc(docRef, cleanData, { merge: true });
     } catch (error) {
-      console.error('Error saving system settings to Firebase:', error);
-      throw error;
+      if (isQuotaError(error)) {
+        logQuotaWarningOnce();
+      } else {
+        console.error('Error saving system settings to Firebase:', error);
+      }
     }
   },
 
